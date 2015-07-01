@@ -1,0 +1,44 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" rdf:about="http://data.digitalecollectie.nl/annotation/summary#TklPRF9CQldPMjpuaW9kOjM0NDEyNjM=">
+    <oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/>
+    <oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#summarizing"/>
+    <oa:hasTarget rdf:resource="NIOD_BBWO2:niod:3441263"/>
+    <oa:hasBody>
+      <rdf:Description xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:meta="http://meresco.org/namespace/harvester/meta" xmlns:dcterms="http://purl.org/dc/terms/">
+        <dc:description>Een burger en een militair op een boot in onbekend wateren.</dc:description>
+        <dc:identifier>http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=127080</dc:identifier>
+        <dc:relation>http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/127080-thumb.jpg?frskey=127080</dc:relation>
+        <dc:subject>Leger - Zie ook: Militairen</dc:subject>
+        <dc:subject>Scheepvaart - Zie ook: Binnenvaart</dc:subject>
+        <dc:type>IMAGE</dc:type>
+        <dcterms:provenance>BBWO2</dcterms:provenance>
+        <edm:type>IMAGE</edm:type>
+        <edm:dataProvider>Oorlogs- en Verzetsmateriaal Groningen</edm:dataProvider>
+        <edm:isShownAt rdf:resource="http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=127080"/>
+        <edm:object rdf:resource="http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/127080-thumb.jpg?frskey=127080"/>
+        <edm:provider>Digitale Collectie</edm:provider>
+        <edm:rights rdf:resource="http://www.europeana.eu/rights/rr-p/"/>
+        <prov:wasDerivedFrom>
+          <prov:Entity rdf:about="NIOD_BBWO2:niod:3441263">
+            <dcterms:identifier>niod:3441263</dcterms:identifier>
+            <prov:wasGeneratedBy>
+              <prov:Activity>
+                <rdfs:label>harvest</rdfs:label>
+                <prov:startedAtTime>2015-06-08T14:27:22Z</prov:startedAtTime>
+                <meta:repository>
+                  <rdf:Description>
+                    <dcterms:identifier>NIOD_BBWO2</dcterms:identifier>
+                    <meta:metadataPrefix>ese</meta:metadataPrefix>
+                    <meta:set>BBWO2</meta:set>
+                    <meta:baseurl>http://oaicat.oorlogsbronnen.knaw.nl/OAIHandler</meta:baseurl>
+                    <meta:repositoryGroupId>NIOD</meta:repositoryGroupId>
+                  </rdf:Description>
+                </meta:repository>
+              </prov:Activity>
+            </prov:wasGeneratedBy>
+          </prov:Entity>
+        </prov:wasDerivedFrom>
+      </rdf:Description>
+    </oa:hasBody>
+  </oa:Annotation>
+</rdf:RDF>

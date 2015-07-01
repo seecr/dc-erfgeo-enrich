@@ -1,0 +1,197 @@
+single result:
+
+{
+    "@context": {
+        "dc": "http://purl.org/dc/elements/1.1/",
+        "dcterms": "http://purl.org/dc/terms/",
+        "edm": "http://www.europeana.eu/schemas/edm/",
+        "edm:isShownAt": {"@type": "@id"},
+        "edm:isShownBy": {"@type": "@id"},
+        "edm:rights": {"@type": "@id"},
+        "geos": "http://www.opengis.net/ont/geosparql#",
+        "geos:hasGeometry": {"@type": "@id"},
+        "hg": "http://schema.histograph.io/#",
+        "hg:sameHgConcept": {"@type": "@id"},
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "owl:sameAs": {"@type": "@id"},
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+    },
+    "@id": "NIOD_BBWO2:niod:3366758",
+    "dc:coverage": ["Bremen", "Duitsland"],
+    "dc:description": ["U.S. Forces take over German ports.\nSergeant Hubert L. Atkins (center) of Norfolk, Virginia, observes dredging operations at the port of Bremerhaven, Germany."],
+    "dc:identifier": ["http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=12001"],
+    "dc:relation": ["http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/12001-thumb.jpg?frskey=12001"],
+    "dc:source": ["NIOD"],
+    "dc:subject": ["Amerikaanse Strijdkrachten", "Havens", "Herstelwerkzaamheden - Zie: Wederopbouw"],
+    "dc:type": ["IMAGE"],
+    "dcterms:provenance": ["BBWO2"],
+    "edm:type": ["IMAGE"],
+    "edm:dataProvider": ["NIOD"],
+    "edm:isShownAt": ["http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=12001"],
+    "edm:provider": ["Digitale Collectie"],
+    "edm:rights": ["http://www.europeana.eu/rights/rr-p/"],
+    "dcterms:spatial": [
+        {
+            "@id": "http://erfgeo.nl/hg/tgn/7271292",
+            "@type": "hg:Place",
+            "rdfs:label": "Scherpenisse",
+            "owl:sameAs": ["http://vocab.getty.edu/tgn/7271292"],
+            "dcterms:source": ["http://erfgeo.nl/hg/tgn"],
+            "hg:sameHgConcept": ["http://erfgeo.nl/hg/ilvb/2827", "http://erfgeo.nl/hg/geonames/2747610"],
+            "geos:hasGeometry": [
+                {
+                    "geos:asWKT": ["POINT(4.1 51.55)"]
+                }
+            ]
+        }
+    ]
+}
+
+# TODO: query url (inspired by SRU)
+erfgeo.data.digitalecollectie.nl/search?query=*&startRecord=11
+- query
+    CQL (subset)! http://www.loc.gov/standards/sru/cql/
+- startRecord (1 based)  (of toch 'from', 0 based, a la ElasticSearch)
+- maximumRecords  (of toch 'size' a la ElasticSearch)
+- term-drilldown (TODO: fix format)
+    - facets currently available:
+        - 'edm:dataProvider'
+        - 'edm:subject'
+        - ... (zie http://data.digitalecollectie.nl/api)
+- sortKeys (liever niet vanwege performance)
+- apikey (evt.)
+
+
+queryResponse, as 'inspired' by ElasticSearch:
+
+{
+  "hits" : {
+    "total" : 153,
+    "hits" : [
+        {
+            @context: {
+                ...
+            },
+            "@id": "NIOD_BBWO2:niod:3366758",
+            "dc:coverage": ["Bremen", "Duitsland"],
+            ...
+        },
+        ...
+    ]
+  },
+  "facets": {
+    "edm:dataProvider": [
+      {"count": 153, "value": "Noord-Hollands Archief"},
+      {"count": 42, "value": "Haags Gemeentearchief"}
+    ],
+    "dc:subject": [
+      {"count": 123, "value": "fiets"},
+      {"count": 81, "value": "persoon"},
+    ]
+  }
+}
+
+Note:
+- max. 30 results per request
+
+Q: How to make actual JSON-LD out of the actual search result wrapper...
+
+// TODO:
+// - dcterms:spatial kan ook verwijzen naar geografische coordinaten met geo properties... (GeluidVanNl)
+// - geo box arguments
+//      check out: https://www.elastic.co/guide/en/elasticsearch/guide/current/filter-by-geopoint.html
+//      Of gewoon in CQL: dcterms:spatial.geoLat > 52.046 AND dcterms:spatial.geoLong > 5.51 AND dcterms:spatial.geoLat < 51.99 AND dcterms:spatial.geoLong < 5.61
+//      Vraag: hoe multi-polygoon indexeren!!?
+//          Stomweg lat, long van middelpunt bounding box...!
+//              heel slordig, maar waarschijnlijk nodig om bounding box search enigszins te laten werken.
+//          (Note: ElasticSearch waarschuwt onderaan https://www.elastic.co/guide/en/elasticsearch/guide/current/geo-bounding-box.html dat geo_bounding_box filter alleen werkt wanneer er maar een waarde is geindexeerd... :-(  )
+///         Veel later mogelijk shapes indexeren zoals ES dat doet: alle geohashes...
+//
+//
+// - SRU response
+//      - search results
+//      - facets
+//          - facet(s) for geolocations?? (e.g. distance)
+//              - see: http://blog.mikemccandless.com/2014/01/geospatial-distance-faceting-using.html
+//
+// TODO: checkout ElasticSearch API
+//
+
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:hg="http://schema.histograph.io/#" xmlns:geos="http://www.opengis.net/ont/geosparql#" xmlns:oa="http://www.w3.org/ns/oa#">
+    <oa:Annotation rdf:about="http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#emVldXdzZV9iaWJsaW90aGVla19iZWVsZDpvYWk6MjRjMmE4NzItOTdkMS0xMWUzLTk0OGYtYWY4NmFjOWMzMDgwOjk0NzcwOGRlLTI0ZDUtNjBkZi04OGZmLTdiNjU2NzMwNjNkZA==">
+         <oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/>
+         <oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#erfGeoEnriching"/>
+         <oa:hasTarget rdf:resource="zeeuwse_bibliotheek_beeld:oai:24c2a872-97d1-11e3-948f-af86ac9c3080:947708de-24d5-60df-88ff-7b65673063dd"/>
+         <!-- query: Scherpenisse -->
+         <oa:hasBody>
+             <rdf:Description>
+                 <dcterms:spatial>
+                    <hg:PlaceInTime rdf:about="http://erfgeo.nl/hg/tgn/7271292">
+                        <rdf:type rdf:resource="http://schema.histograph.io/#Place"/>
+                        <rdfs:label>Scherpenisse</rdfs:label>
+                        <owl:sameAs rdf:resource="http://vocab.getty.edu/tgn/7271292"/>
+                        <dcterms:source rdf:resource="http://erfgeo.nl/hg/tgn"/>
+                        <hg:sameHgConcept rdf:resource="http://erfgeo.nl/hg/ilvb/2827"/>
+                        <hg:sameHgConcept rdf:resource="http://erfgeo.nl/hg/geonames/2747610"/>
+                        <geos:hasGeometry>
+                            <rdf:Description>
+                                 <geos:hasWKT>POINT(4.1 51.55)</geos:hasWKT>
+                            </rdf:Description>
+                        </geos:hasGeometry>
+                    </hg:PlaceInTime>
+                 </dcterms:spatial>
+             </rdf:Description>
+         </oa:hasBody>
+    </oa:Annotation>
+</rdf:RDF>
+
+
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" rdf:about="http://data.digitalecollectie.nl/annotation/summary#TklPRF9CQldPMjpuaW9kOjMzNjY3NTg=">
+    <oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/>
+    <oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#summarizing"/>
+    <oa:hasTarget rdf:resource="NIOD_BBWO2:niod:3366758"/>
+    <oa:hasBody>
+      <rdf:Description xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:meta="http://meresco.org/namespace/harvester/meta" xmlns:dcterms="http://purl.org/dc/terms/">
+        <dc:coverage>Bremen</dc:coverage>
+        <dc:coverage>Duitsland</dc:coverage>
+        <dc:description>U.S. Forces take over German ports.
+Sergeant Hubert L. Atkins (center) of Norfolk, Virginia, observes dredging operations at the port of Bremerhaven, Germany.</dc:description>
+        <dc:identifier>http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=12001</dc:identifier>
+        <dc:relation>http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/12001-thumb.jpg?frskey=12001</dc:relation>
+        <dc:source>NIOD</dc:source>
+        <dc:subject>Amerikaanse Strijdkrachten</dc:subject>
+        <dc:subject>Havens</dc:subject>
+        <dc:subject>Herstelwerkzaamheden - Zie: Wederopbouw</dc:subject>
+        <dc:type>IMAGE</dc:type>
+        <dcterms:provenance>BBWO2</dcterms:provenance>
+        <edm:type>IMAGE</edm:type>
+        <edm:dataProvider>NIOD</edm:dataProvider>
+        <edm:isShownAt rdf:resource="http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=12001"/>
+        <edm:object rdf:resource="http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/12001-thumb.jpg?frskey=12001"/>
+        <edm:provider>Digitale Collectie</edm:provider>
+        <edm:rights rdf:resource="http://www.europeana.eu/rights/rr-p/"/>
+        <prov:wasDerivedFrom>
+          <prov:Entity rdf:about="NIOD_BBWO2:niod:3366758">
+            <dcterms:identifier>niod:3366758</dcterms:identifier>
+            <prov:wasGeneratedBy>
+              <prov:Activity>
+                <rdfs:label>harvest</rdfs:label>
+                <prov:startedAtTime>2015-06-19T08:15:14Z</prov:startedAtTime>
+                <meta:repository>
+                  <rdf:Description>
+                    <dcterms:identifier>NIOD_BBWO2</dcterms:identifier>
+                    <meta:metadataPrefix>ese</meta:metadataPrefix>
+                    <meta:set>BBWO2</meta:set>
+                    <meta:baseurl>http://oaicat.oorlogsbronnen.knaw.nl/OAIHandler</meta:baseurl>
+                    <meta:repositoryGroupId>NIOD</meta:repositoryGroupId>
+                  </rdf:Description>
+                </meta:repository>
+              </prov:Activity>
+            </prov:wasGeneratedBy>
+          </prov:Entity>
+        </prov:wasDerivedFrom>
+      </rdf:Description>
+    </oa:hasBody>
+  </oa:Annotation>
+</rdf:RDF>

@@ -1,0 +1,20 @@
+{
+  "setsSelection": [
+      {
+        "repositoryId": "NIOD",
+        "sets": ["*"]
+      },
+      {
+        "repositoryId": "limburgs_erfgoed",
+        "sets": ["*"]
+      },
+      {
+        "repositoryId": "zeeuwse_bibliotheek",
+        "sets": ["*"]
+      },
+      {
+        "repositoryId": "geluidVanNl",
+        "sets": ["*"]
+      }
+  ]
+}

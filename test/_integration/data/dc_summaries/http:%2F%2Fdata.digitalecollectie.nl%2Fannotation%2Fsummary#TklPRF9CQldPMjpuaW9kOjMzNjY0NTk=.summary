@@ -1,0 +1,50 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" rdf:about="http://data.digitalecollectie.nl/annotation/summary#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=">
+    <oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/>
+    <oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#summarizing"/>
+    <oa:hasTarget rdf:resource="NIOD_BBWO2:niod:3366459"/>
+    <oa:hasBody>
+      <rdf:Description xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:meta="http://meresco.org/namespace/harvester/meta" xmlns:dcterms="http://purl.org/dc/terms/">
+        <dc:coverage>Verenigde Staten</dc:coverage>
+        <dc:description>NEW LIFE RAFT FOR U.S. BOMBER CREWS.
+Trimming their sail, these "downed aviators" demonstrate the new seven-men rubber lift raft now being manufactured for heavy bombers of the U.S. Army Air Forces. The raft is 12 feet long and weighs 70 pounds with standard equipment. The top is painted orange-yellow for quick visibility at sea while the bottom is blue to avoid attracting sharks.</dc:description>
+        <dc:identifier>http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=11683</dc:identifier>
+        <dc:relation>http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/11683-thumb.jpg?frskey=11683</dc:relation>
+        <dc:source>NIOD</dc:source>
+        <dc:subject>Amerikaanse Strijdkrachten</dc:subject>
+        <dc:subject>Piloten</dc:subject>
+        <dc:subject>Reddingswezen</dc:subject>
+        <dc:subject>Uitrusting - Zie ook: Uniformen, Wapens</dc:subject>
+        <dc:subject>Zeeoorlog</dc:subject>
+        <dc:type>IMAGE</dc:type>
+        <dcterms:provenance>BBWO2</dcterms:provenance>
+        <edm:type>IMAGE</edm:type>
+        <edm:dataProvider>NIOD</edm:dataProvider>
+        <edm:isShownAt rdf:resource="http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&amp;imid=11683"/>
+        <edm:object rdf:resource="http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/11683-thumb.jpg?frskey=11683"/>
+        <edm:provider>Digitale Collectie</edm:provider>
+        <edm:rights rdf:resource="http://www.europeana.eu/rights/rr-p/"/>
+        <prov:wasDerivedFrom>
+          <prov:Entity rdf:about="NIOD_BBWO2:niod:3366459">
+            <dcterms:identifier>niod:3366459</dcterms:identifier>
+            <prov:wasGeneratedBy>
+              <prov:Activity>
+                <rdfs:label>harvest</rdfs:label>
+                <prov:startedAtTime>2015-06-08T14:27:22Z</prov:startedAtTime>
+                <meta:repository>
+                  <rdf:Description>
+                    <dcterms:identifier>NIOD_BBWO2</dcterms:identifier>
+                    <meta:metadataPrefix>ese</meta:metadataPrefix>
+                    <meta:set>BBWO2</meta:set>
+                    <meta:baseurl>http://oaicat.oorlogsbronnen.knaw.nl/OAIHandler</meta:baseurl>
+                    <meta:repositoryGroupId>NIOD</meta:repositoryGroupId>
+                  </rdf:Description>
+                </meta:repository>
+              </prov:Activity>
+            </prov:wasGeneratedBy>
+          </prov:Entity>
+        </prov:wasDerivedFrom>
+      </rdf:Description>
+    </oa:hasBody>
+  </oa:Annotation>
+</rdf:RDF>
