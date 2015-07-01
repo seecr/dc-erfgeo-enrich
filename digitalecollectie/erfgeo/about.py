@@ -43,10 +43,11 @@ from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFIL
 
 
 class About(Observable):
-    def __init__(self, digitaleCollectieHost=None, digitaleCollectiePort=None):
+    def __init__(self, digitaleCollectieHost=None, digitaleCollectiePort=None, digitaleCollectieApiKey=None):
         Observable.__init__(self)
         self._digitaleCollectieHost = digitaleCollectieHost
         self._digitaleCollectiePort = digitaleCollectiePort
+        self._digitaleCollectieApiKey = digitaleCollectieApiKey
 
     def handleRequest(self, arguments, **kwargs):
         uri = arguments.get('uri', [None])[0]
@@ -57,9 +58,10 @@ class About(Observable):
 
         identifier = uri
         if profile != ERFGEO_ENRICHMENT_PROFILE.prefix:
+            if self._digitaleCollectieApiKey:
+                arguments['apikey'] = [self._digitaleCollectieApiKey]
             result = yield httpget(host=self._digitaleCollectieHost, port=self._digitaleCollectiePort, request='/about?' + urlencode(arguments, doseq=True))
             yield result
-            # yield badRequest('unknown')  # TODO: redirect/forward to proper core's /about
             return
 
         identifier = ERFGEO_ENRICHMENT_PROFILE.uriFor(uri)

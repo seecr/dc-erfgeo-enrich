@@ -127,6 +127,7 @@ class SeecrOaiWatermark(object):
 def dna(reactor, config, statePath, out=stdout):
     digitaleCollectieHost = config.get('digitaleCollectie.host', '127.0.0.1')
     digitaleCollectiePort = int(config['digitaleCollectie.port'])
+    digitaleCollectieApiKey = config.get('digitaleCollectie.apikey')
     additionalGlobals['port'] = portNumber = int(config['portNumber'])
     searchApiBaseUrl = config.get('erfgeo.searchApiBaseUrl', 'https://api.histograph.io/search')
 
@@ -142,11 +143,14 @@ def dna(reactor, config, statePath, out=stdout):
     oaiJazz = OaiJazz(oaiPath)
     erfGeoEnrichmentStorage = MultiSequentialStorage(join(statePath, 'storage'))
 
+    digitaleCollectieOaiPath = '/oai'
+    if digitaleCollectieApiKey:
+        digitaleCollectieOaiPath = '/oai/%s' % digitaleCollectieApiKey
     oaiSetsHarvester = OaiSetsHarvester(
         reactor=reactor,
         hostName=digitaleCollectieHost,
         portNumber=digitaleCollectiePort,
-        path='/oai',
+        path=digitaleCollectieOaiPath,
         interval=periodicdownload_period,
         workingDirectory=join(statePath, 'harvest')
     )
@@ -174,7 +178,7 @@ def dna(reactor, config, statePath, out=stdout):
                 (Deproxy(deproxyForIps=['127.0.0.1', IP_ADDRESS]),
                     (ApacheLogger(out),
                         (PathFilter('/about'),
-                            (About(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort),
+                            (About(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort, digitaleCollectieApiKey=digitaleCollectieApiKey),
                                 (erfGeoEnrichmentStorage,)
                             )
                         ),
