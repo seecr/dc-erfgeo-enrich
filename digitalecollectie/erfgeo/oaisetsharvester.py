@@ -42,7 +42,7 @@ from weightless.core import be
 from meresco.oai import UpdateAdapterFromOaiDownloadProcessor
 
 from digitalecollectie.erfgeo.callstackdict import CallStackDict
-from digitalecollectie.erfgeo.repositorysetsselection import WILDCARD
+from digitalecollectie.erfgeo.setsselection import WILDCARD
 from digitalecollectie.erfgeo.annotationprofiles import SUMMARY_PROFILE
 
 
@@ -78,37 +78,34 @@ class OaiSetsHarvester(InsideOutObservable):
 
     def observer_init(self):
         yield self.outside.once.observer_init()
-        for (repositoryId, setSpec) in self.call.selectedSetSpecs():
-            self._addSetHarvest(repositoryId, setSpec)
+        for setSpec in self.call.selectedSetSpecs():
+            self._addSetHarvest(setSpec)
 
     def handleShutdown(self):
         yield self.internalObserverTreeRoot.once.handleShutdown()
 
-    def addSetHarvest(self, repositoryId, setSpec=WILDCARD):
-        self.do.addToSelection(repositoryId=repositoryId, setSpec=setSpec)
-        self._addSetHarvest(repositoryId=repositoryId, setSpec=setSpec)
+    def addSetHarvest(self, setSpec=WILDCARD):
+        self.do.addToSelection(setSpec=setSpec)
+        self._addSetHarvest(setSpec=setSpec)
 
-    def _addSetHarvest(self, repositoryId, setSpec):
-        repoSet = self._repositoryIdToSet(repositoryId)
-        setSpec = repoSet if setSpec is WILDCARD else "%s:%s" % (repoSet, setSpec)
-        setFormatName = setSpec
-        setFormatWorkingDirectory = join(self._workingDirectory, setFormatName)
-        isdir(setFormatWorkingDirectory) or makedirs(setFormatWorkingDirectory)
-        self._periodicDownloaders[setFormatName] = periodicDownload = PeriodicDownload(
+    def _addSetHarvest(self, setSpec):
+        setWorkingDirectory = join(self._workingDirectory, setSpec)
+        isdir(setWorkingDirectory) or makedirs(setWorkingDirectory)
+        self._periodicDownloaders[setSpec] = periodicDownload = PeriodicDownload(
             reactor=self._reactor,
             host=self._hostName,
             port=self._portNumber,
             schedule=Schedule(period=self._interval)
         )
         setHarvestTree = be(
-            (Transparent(name=setFormatName),
+            (Transparent(name=setSpec),
                 (periodicDownload,
                     (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode"),
                         (OaiDownloadProcessor(
                                 path=self._path,
                                 metadataPrefix=self._metadataPrefix,
                                 set=setSpec,
-                                workingDirectory=setFormatWorkingDirectory,
+                                workingDirectory=setWorkingDirectory,
                                 xWait=True),
                             (CallStackDict(dict(
                                     harvestedMetadataPrefix=lambda **kwargs: self._metadataPrefix,
@@ -123,6 +120,3 @@ class OaiSetsHarvester(InsideOutObservable):
         )
         self.internalObserverTreeRoot.addObserver(setHarvestTree)
         periodicDownload.observer_init()
-
-    def _repositoryIdToSet(self, repositoryId):
-        return quote(repositoryId, safe='')

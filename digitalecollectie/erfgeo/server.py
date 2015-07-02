@@ -57,7 +57,7 @@ from digitalecollectie.erfgeo.erfgeoquery import ErfGeoQuery
 from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
 from digitalecollectie.erfgeo.pittoannotation import PitToAnnotation
-from digitalecollectie.erfgeo.repositorysetsselection import RepositorySetsSelection
+from digitalecollectie.erfgeo.setsselection import SetsSelection
 from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
 from digitalecollectie.erfgeo.summarytoerfgeoenrichment import SummaryToErfGeoEnrichment
 from digitalecollectie.erfgeo.utils import getitem
@@ -131,7 +131,7 @@ def dna(reactor, config, statePath, out=stdout):
     additionalGlobals['port'] = portNumber = int(config['portNumber'])
     searchApiBaseUrl = config.get('erfgeo.searchApiBaseUrl', 'https://api.histograph.io/search')
 
-    erfGeoRepositorySetsSelection = RepositorySetsSelection(join(statePath, 'erfgeo_repository_sets.json'))
+    erfGeoSetsSelection = SetsSelection(join(statePath, 'erfgeo_dc_sets.json'))
 
     oaiRepositoryName = config['oaiRepositoryName']
     oaiAdminEmail = config['oaiAdminEmail']
@@ -171,7 +171,7 @@ def dna(reactor, config, statePath, out=stdout):
     return \
         (Observable(),
             (oaiSetsHarvester,
-                (erfGeoRepositorySetsSelection,),
+                (erfGeoSetsSelection,),
                 uploadHelix
             ),
             (observableHttpServer,

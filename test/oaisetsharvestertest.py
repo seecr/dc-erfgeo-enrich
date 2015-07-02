@@ -40,7 +40,7 @@ from seecr.test import SeecrTestCase, CallTrace
 from weightless.core import compose
 
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
-from digitalecollectie.erfgeo.repositorysetsselection import RepositorySetsSelection
+from digitalecollectie.erfgeo.setsselection import SetsSelection
 
 from callstackdicttest import CallStackDictMonitor
 
@@ -48,9 +48,9 @@ from callstackdicttest import CallStackDictMonitor
 class OaiSetsHarvesterTest(SeecrTestCase):
     def setUp(self):
         SeecrTestCase.setUp(self)
-        self._repositorySetsSelectionFilepath = join(self.tempdir, 'repository_sets_selection.json')
-        open(self._repositorySetsSelectionFilepath, 'w').write(EUROPEANA_REPO_SETS_SELECTION_JSON)
-        self._repositorySetsSelection = RepositorySetsSelection(self._repositorySetsSelectionFilepath)
+        self._setsSelectionFilepath = join(self.tempdir, 'sets_selection.json')
+        open(self._setsSelectionFilepath, 'w').write(SETS_SELECTION_JSON)
+        self._setsSelection = SetsSelection(self._setsSelectionFilepath)
 
     def testOaiSetsHarvester(self):
         reactorStub = CallTrace('reactor')
@@ -62,7 +62,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             interval=0.1,
             workingDirectory=join(self.tempdir, 'harvest'),
         )
-        oaiSetsHarvester.addObserver(self._repositorySetsSelection)
+        oaiSetsHarvester.addObserver(self._setsSelection)
         observer = CallTrace('observer', emptyGeneratorMethods=['add'])
         oaiSetsHarvester.addObserver(observer)
         callStackDictMonitor = CallStackDictMonitor()
@@ -104,8 +104,8 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         self.assertEquals([{'harvestedSet': 'beng', 'harvestedMetadataPrefix': 'summary'}, {'harvestedSet': 'beng', 'harvestedMetadataPrefix': 'summary'}], callStackDictMonitor.dicts)
 
     def testAddSetHarvester(self):
-        remove(self._repositorySetsSelectionFilepath)
-        repositorySetsSelection = RepositorySetsSelection(self._repositorySetsSelectionFilepath)
+        remove(self._setsSelectionFilepath)
+        setsSelection = SetsSelection(self._setsSelectionFilepath)
 
         reactorStub = CallTrace('reactor')
         oaiSetsHarvester = OaiSetsHarvester(
@@ -116,8 +116,8 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             interval=0.1,
             workingDirectory=join(self.tempdir, 'harvest'),
         )
-        oaiSetsHarvester.addObserver(repositorySetsSelection)
-        self.assertEquals("""{\n  "setsSelection": []\n}""", open(self._repositorySetsSelectionFilepath).read())
+        oaiSetsHarvester.addObserver(setsSelection)
+        self.assertEquals("""[]""", open(self._setsSelectionFilepath).read())
         observer = CallTrace('observer', emptyGeneratorMethods=['add'])
         oaiSetsHarvester.addObserver(observer)
 
@@ -130,7 +130,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         self.assertEquals(['observer_init'], [m.name for m in observer.calledMethods])
 
         oaiSetsHarvester.addSetHarvest('beng')
-        oaiSetsHarvester.addSetHarvest('open_beelden', 'beeldengeluid')
+        oaiSetsHarvester.addSetHarvest('open_beelden:beeldengeluid')
         self.assertEquals(
             set(['beng', 'open_beelden:beeldengeluid']),
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
@@ -152,7 +152,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             interval=0.1,
             workingDirectory=join(self.tempdir, 'harvest'),
         )
-        oaiSetsHarvester.addObserver(self._repositorySetsSelection)
+        oaiSetsHarvester.addObserver(self._setsSelection)
         list(compose(oaiSetsHarvester.observer_init()))
 
         oaiSetsHarvester.addSetHarvest('rce')
@@ -161,40 +161,13 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
         )
         self.assertEquals(5 * ['addTimer'], [m.name for m in reactorStub.calledMethods])
-        self.assertEqualsWS("""{
-  "setsSelection": [
-    {
-      "repositoryId": "beng",
-      "sets": [
-        "*"
-      ]
-    },
-    {
-      "repositoryId": "kb",
-      "sets": [
-        "*"
-      ]
-    },
-    {
-      "repositoryId": "nationaal_archief",
-      "sets": [
-        "*"
-      ]
-    },
-    {
-      "repositoryId": "open_beelden",
-      "sets": [
-        "beeldengeluid"
-      ]
-    },
-    {
-      "repositoryId": "rce",
-      "sets": [
-        "*"
-      ]
-    }
-  ]
-}""", open(self._repositorySetsSelectionFilepath).read())
+        self.assertEqualsWS("""[
+  "beng",
+  "kb",
+  "nationaal_archief",
+  "open_beelden:beeldengeluid",
+  "rce"
+]""", open(self._setsSelectionFilepath).read())
 
         reactorStub.calledMethods.reset()
         oaiSetsHarvester = OaiSetsHarvester(
@@ -205,7 +178,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             interval=0.1,
             workingDirectory = join(self.tempdir, 'harvest'),
         )
-        oaiSetsHarvester.addObserver(RepositorySetsSelection(self._repositorySetsSelectionFilepath))
+        oaiSetsHarvester.addObserver(SetsSelection(self._setsSelectionFilepath))
         self.assertEquals([], [m.name for m in reactorStub.calledMethods])
         list(compose(oaiSetsHarvester.observer_init()))
         self.assertEquals(
@@ -261,26 +234,10 @@ LISTIDENTIFIERS_RESPONSE = """\
     </ListIdentifiers>
 </OAI-PMH>"""
 
-EUROPEANA_REPO_SETS_SELECTION_JSON = """\n
-{
-  "setsSelection": [
-    {
-      "sets": ["*"],
-      "repositoryId": "kb"
-    },
-    {
-      "sets": ["*"],
-      "repositoryId": "beng"
-    },
-    {
-      "sets": ["*"],
-      "repositoryId": "nationaal_archief"
-    },
-    {
-      "repositoryId": "open_beelden",
-      "sets": [
-        "beeldengeluid"
-      ]
-    }
-  ]
-}"""
+SETS_SELECTION_JSON = """\
+[
+    "kb",
+    "beng",
+    "nationaal_archief",
+    "open_beelden:beeldengeluid"
+]"""

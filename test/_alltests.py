@@ -9,8 +9,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2011-2012, 2014-2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2011-2012, 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -46,7 +46,7 @@ from callstackdicttest import CallStackDictTest
 from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
 from oaisetsharvestertest import OaiSetsHarvesterTest
 from pittoannotationtest import PitToAnnotationTest
-from repositorysetsselectiontest import RepositorySetsSelectionTest
+from setsselectiontest import SetsSelectionTest
 from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
 
 if __name__ == '__main__':

@@ -68,10 +68,10 @@ class ErfGeoIntegrationState(IntegrationState):
 
         self.erfGeoEnrichmentPort = PortNumberGenerator.next()
         self.erfGeoEnrichmentLocalStatePath = join(self.integrationTempdir, 'erfGeoEnrichmentLocal')
-        erfGeoRepositorySetsSelectionFile = join(self.erfGeoEnrichmentLocalStatePath, 'erfgeo_repository_sets.json')
+        erfGeoRepositorySetsSelectionFile = join(self.erfGeoEnrichmentLocalStatePath, 'erfgeo_dc_sets.json')
         if not self.fastMode:
             clearOrCreateDir(self.erfGeoEnrichmentLocalStatePath)
-            open(erfGeoRepositorySetsSelectionFile, 'w').write(ERFGEO_REPOSITORY_SETS_SELECTION_JSON)
+            open(erfGeoRepositorySetsSelectionFile, 'w').write(ERFGEO_SETS_SELECTION_JSON)
 
         self.erfGeoApiPort = PortNumberGenerator.next()
 
@@ -171,29 +171,12 @@ class ErfGeoIntegrationState(IntegrationState):
         self._stopServer(*args, **kwargs)
 
 
-ERFGEO_REPOSITORY_SETS_SELECTION_JSON = """\n
-{
-  "setsSelection": [
-    {
-      "repositoryId": "NIOD",
-      "sets": [
-        "*"
-      ]
-    },
-    {
-      "repositoryId": "limburgs_erfgoed",
-      "sets": [
-        "*"
-      ]
-    },
-    {
-      "repositoryId": "zeeuwse_bibliotheek",
-      "sets": [
-        "*"
-      ]
-    }
-  ]
-}"""
+ERFGEO_SETS_SELECTION_JSON = """\
+[
+    "NIOD",
+    "limburgs_erfgoed",
+    "zeeuwse_bibliotheek"
+]"""
 
 
 def clearOrCreateDir(d):

@@ -8,8 +8,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2011-2012, 2014-2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2011-2012, 2014-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -32,57 +32,43 @@
 
 from os import rename, makedirs
 from os.path import isfile, isdir, dirname
-from collections import defaultdict
 
 from simplejson import dumps, loads
 
 
 WILDCARD = '*'
 
-class RepositorySetsSelection(object):
+class SetsSelection(object):
     def __init__(self, filepath):
         self._filepath = filepath
         isdir(dirname(self._filepath)) or makedirs(dirname(self._filepath))
         self._read()
 
-    def selectedSetSpecs(self, repositoryId=None):
-        for key in sorted(self._selection.keys()):
-            if repositoryId is None or key == repositoryId:
-                sets = self._selection[key]
-                for setSpec in sorted(sets):
-                    yield (key, setSpec)
+    def selectedSetSpecs(self):
+        for setSpec in self._selection:
+            yield setSpec
 
-    def addToSelection(self, repositoryId, setSpec=WILDCARD):
-        sets = self._selection[repositoryId]
-        sets.append(setSpec)
-        if WILDCARD in sets:
-            for setSpec in sets[:]:
-                if setSpec != WILDCARD:
-                    sets.remove(setSpec)
-        self._selection[repositoryId] = list(set(sets))
+    def addToSelection(self, setSpec=WILDCARD):
+        if setSpec == WILDCARD:
+            self._selection = [WILDCARD]
+        elif setSpec not in self._selection:
+            self._selection.append(setSpec)
+            self._selection = sorted(self._selection)
         self._save()
 
-    def isSelected(self, repositoryId, setSpec=WILDCARD):
-        try:
-            return setSpec in self._selection[repositoryId]
-        except KeyError:
-            return False
+    def isSelected(self, setSpec):
+        return setSpec in self._selection
 
     def _read(self):
-        self._selection = defaultdict(list)
+        self._selection = []
         if not isfile(self._filepath):
             self._save()
             return
-        jsonDict = loads(open(self._filepath).read())
-        for d in jsonDict['setsSelection']:
-            self._selection[d['repositoryId']] = d['sets']
+        s = open(self._filepath).read()
+        self._selection = sorted(loads(s))
 
     def _save(self):
-        jsonDict = {'setsSelection': [
-            dict(repositoryId=repositoryId, sets=sets)
-            for repositoryId, sets in sorted(self._selection.items())
-        ]}
         tmpfile = self._filepath + '~'
         with open(tmpfile, "w") as f:
-            f.write(dumps(jsonDict, sort_keys=True, indent=2))
+            f.write(dumps(self._selection, indent=2))
         rename(tmpfile, self._filepath)

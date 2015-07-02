@@ -89,7 +89,7 @@ def dna(reactor, portNumber, dataDirs, tempDir, batchSize):
                 (PathFilter('/', excluding=['/ready']),
                     (IllegalFromFix(),
                         (OaiPmh(repositoryName='Mock', adminEmail='no@example.org', supportXWait=True, batchSize=batchSize),
-                            # (LogComponent('OaiPmh'),),
+                            (LogComponent('OaiPmh'),),
                             (oaiJazz,),
                             (storage,),
                         )
