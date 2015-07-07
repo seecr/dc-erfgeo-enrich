@@ -56,18 +56,11 @@ class About(Observable):
             return
         profile = arguments.get('profile', [ERFGEO_ENRICHMENT_PROFILE.prefix])[0]
 
-        identifier = uri
-        if profile != ERFGEO_ENRICHMENT_PROFILE.prefix:
-            if self._digitaleCollectieApiKey:
-                arguments['apikey'] = [self._digitaleCollectieApiKey]
-            result = yield httpget(host=self._digitaleCollectieHost, port=self._digitaleCollectiePort, request='/about?' + urlencode(arguments, doseq=True))
-            yield result
-            return
-
-        identifier = ERFGEO_ENRICHMENT_PROFILE.uriFor(uri)
-
         try:
-            data = self.call.getData(identifier=identifier, name=profile)
+            data = yield self.about(uri=uri, profile=profile)
+        except ValueError, e:
+            yield badRequest(str(e))
+            return
         except KeyError:
             yield badRequest("profile '%s' not found for uri '%s'." % (profile, uri))
             return
@@ -76,6 +69,20 @@ class About(Observable):
         yield 'Content-Type: application/xml' + CRLF
         yield CRLF
         yield data
+
+    def about(self, uri, profile):
+        if profile == ERFGEO_ENRICHMENT_PROFILE.prefix:
+            data = self.call.getData(identifier=ERFGEO_ENRICHMENT_PROFILE.uriFor(uri), name=profile)
+        else:
+            arguments = {'uri': [uri], 'profile': [profile]}
+            if self._digitaleCollectieApiKey:
+                arguments['apikey'] = [self._digitaleCollectieApiKey]
+            result = yield httpget(host=self._digitaleCollectieHost, port=self._digitaleCollectiePort, request='/about?' + urlencode(arguments, doseq=True))
+            header, body = result.split(2 * CRLF, 1)
+            if not 'HTTP/1.0 200' in header:
+                raise ValueError(body)
+            data = body
+        raise StopIteration(data)
 
 
 def badRequest(message):

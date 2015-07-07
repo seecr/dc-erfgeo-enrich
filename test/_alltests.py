@@ -49,5 +49,9 @@ from pittoannotationtest import PitToAnnotationTest
 from setsselectiontest import SetsSelectionTest
 from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
 
+from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
+from index.lxmltofieldslisttest import LxmlToFieldsListTest
+
+
 if __name__ == '__main__':
     main()

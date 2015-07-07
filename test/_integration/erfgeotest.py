@@ -35,6 +35,8 @@ from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
 
 from seecr.test.utils import getRequest
 from seecr.test.integrationtestcase import IntegrationTestCase
+from meresco.components import lxmltostring
+from lxml.etree import XML
 
 
 class ErfGeoTest(IntegrationTestCase):
@@ -88,6 +90,31 @@ class ErfGeoTest(IntegrationTestCase):
         body = self.getPage('/index')
         self.assertTrue('<h1>ErfGeo Verrijkingen</h1>' in body, body)
 
+    def testSru(self):
+        self.assertSruQuery(2, '*')
+        self.assertSruQuery(1, 'dc:subject=Zeeoorlog')
+        self.assertSruQuery(2, 'meta:repositoryGroupId exact "NIOD"')
+
+    def assertSruQuery(self, numberOfRecords, query, path=None, additionalHeaders=None):
+        path = path or '/sru'
+        responseBody = self._doQuery({'query': query}, path=path, additionalHeaders=additionalHeaders)
+        diagnostic = xpathFirst(responseBody, "//diag:diagnostic")
+        if not diagnostic is None:
+            raise RuntimeError(lxmltostring(diagnostic))
+        count = int(xpath(responseBody, "/srw:searchRetrieveResponse/srw:numberOfRecords/text()")[0])
+        self.assertEquals(numberOfRecords, count)
+
+    def _doQuery(self, arguments, path=None, additionalHeaders=None, statusCode='200'):
+        path = path or '/sru'
+        queryArguments = {'version': '1.1', 'operation': 'searchRetrieve'}
+        queryArguments.update(arguments)
+        header, body = getRequest(self.erfGeoEnrichmentPort, path, queryArguments, parse=False, additionalHeaders=additionalHeaders)
+        print 'header:', header
+        print 'body:', body
+        from sys import stdout; stdout.flush()
+        self.assertTrue(statusCode in header.split('\r\n', 1)[0])
+        bodyLxml = XML(body)
+        return bodyLxml
 
     def getPage(self, path, arguments=None):
         header, body = getRequest(self.erfGeoEnrichmentPort, path, arguments if arguments else {}, parse=False)

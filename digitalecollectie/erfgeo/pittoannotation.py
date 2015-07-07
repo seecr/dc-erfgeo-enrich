@@ -59,11 +59,12 @@ class PitToAnnotation(Observable):
         source = None
         if query:
             source = "%s?%s" % (self._searchApiBaseUrl, urlencode({'q': query}))
-        yield '''<rdf:RDF %(xmlns_rdf)s %(xmlns_rdfs)s %(xmlns_dcterms)s %(xmlns_owl)s %(xmlns_hg)s %(xmlns_geos)s %(xmlns_oa)s>\n''' % namespaces
+        yield '''<rdf:RDF %(xmlns_rdf)s>\n''' % namespaces
+        annotationRdfAbout = ''
         if uri:
-            yield '    <oa:Annotation rdf:about="%s">\n' % uri
-        else:
-            yield '    <oa:Annotation>\n'
+            annotationRdfAbout = ' rdf:about="%s"' % uri
+        yield '    <oa:Annotation %(xmlns_oa)s %(xmlns_rdfs)s %(xmlns_dcterms)s %(xmlns_owl)s %(xmlns_hg)s %(xmlns_geos)s' % namespaces
+        yield '%s\n>' % annotationRdfAbout
         yield '         <oa:annotatedBy rdf:resource="%s"/>\n' % uris.idDigitaleCollectie
         yield '         <oa:motivatedBy rdf:resource="%s"/>\n' % ERFGEO_ENRICHMENT_PROFILE.motive
         if targetUri:

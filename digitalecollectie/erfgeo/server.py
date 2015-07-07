@@ -38,12 +38,16 @@ from socket import gethostname, gethostbyname
 from weightless.core import be, consume
 from weightless.io import Reactor
 
+from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
+from meresco.components.sru import SruParser, SruHandler
 from meresco.core import Observable, Transparent
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
-from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring
+from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact
 from meresco.components.http import ObservableHttpServer, PathFilter, FileServer, PathRename, ApacheLogger, StringServer, Deproxy
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.log import LogComponent
+from meresco.lucene import UNTOKENIZED_PREFIX
+from meresco.lucene.remote import LuceneRemote
 from meresco.oai import OaiJazz, OaiPmh, OaiAddRecordWithDefaults
 from meresco.sequentialstore import MultiSequentialStorage, AddDeleteToMultiSequential
 from meresco.html import DynamicHtml
@@ -54,6 +58,7 @@ from digitalecollectie.erfgeo.adoptoaisetspecs import AdoptOaiSetSpecs
 from digitalecollectie.erfgeo.callstackdict import CallStackDict
 from digitalecollectie.erfgeo.erfgeoenrichmentfromsummary import ErfGeoEnrichmentFromSummary
 from digitalecollectie.erfgeo.erfgeoquery import ErfGeoQuery
+from digitalecollectie.erfgeo.index.erfgeoenrichmentcombinedwithsummary import ErfGeoEnrichmentCombinedWithSummary
 from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
 from digitalecollectie.erfgeo.pittoannotation import PitToAnnotation
@@ -61,6 +66,7 @@ from digitalecollectie.erfgeo.setsselection import SetsSelection
 from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
 from digitalecollectie.erfgeo.summarytoerfgeoenrichment import SummaryToErfGeoEnrichment
 from digitalecollectie.erfgeo.utils import getitem
+from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
 
 
 workingPath = dirname(abspath(__file__))
@@ -70,6 +76,21 @@ dynamicHtmlFilePath = join(htmlPath, 'dynamic')
 staticHtmlFilePath = join(htmlPath, 'static')
 
 IP_ADDRESS = gethostbyname(gethostname())
+
+drilldownFieldnames = [
+    UNTOKENIZED_PREFIX + 'record.subject',
+    UNTOKENIZED_PREFIX + 'meta.repository.repositoryGroupId',
+] + [df.name for df in SummaryFields.drilldownFields]
+
+untokenizedFieldnames = drilldownFieldnames[:]
+
+cqlClauseConverters = [
+    RenameFieldForExact(
+        untokenizedFields=untokenizedFieldnames,
+        untokenizedPrefix=UNTOKENIZED_PREFIX,
+    ).filterAndModifier(),
+]
+
 
 def staticFileExists(filepath):
     if '/..' in filepath:
@@ -128,7 +149,8 @@ def dna(reactor, config, statePath, out=stdout):
     digitaleCollectieHost = config.get('digitaleCollectie.host', '127.0.0.1')
     digitaleCollectiePort = int(config['digitaleCollectie.port'])
     digitaleCollectieApiKey = config.get('digitaleCollectie.apikey')
-    additionalGlobals['port'] = portNumber = int(config['portNumber'])
+    additionalGlobals['port'] = portNumber = int(config['erfgeoEnrich.portNumber'])
+    indexPortNumber = int(config['erfgeoEnrich.index.portNumber'])
     searchApiBaseUrl = config.get('erfgeo.searchApiBaseUrl', 'https://api.histograph.io/search')
 
     erfGeoSetsSelection = SetsSelection(join(statePath, 'erfgeo_dc_sets.json'))
@@ -185,10 +207,30 @@ def dna(reactor, config, statePath, out=stdout):
                         (PathFilter('/oai'),
                             (OaiPmh(
                                     repositoryName=oaiRepositoryName,
-                                    adminEmail=oaiAdminEmail),
+                                    adminEmail=oaiAdminEmail,
+                                    supportXWait=True),
                                 (SeecrOaiWatermark(),),
                                 (oaiJazz,),
                                 (erfGeoEnrichmentStorage,),
+                            )
+                        ),
+                        (PathFilter("/sru"),
+                            (SruParser(defaultRecordSchema='summary+erfGeoEnrichment', defaultRecordPacking='xml'),
+                                (SruHandler(),
+                                    (CqlMultiSearchClauseConversion(
+                                          cqlClauseConverters,
+                                          fromKwarg='cqlAbstractSyntaxTree'),
+                                        (TranslateDrilldownFieldnames(translate=lambda field: UNTOKENIZED_PREFIX + field),
+                                            (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
+                                        ),
+                                    ),
+                                    (ErfGeoEnrichmentCombinedWithSummary(),
+                                        (erfGeoEnrichmentStorage,),
+                                        (About(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort, digitaleCollectieApiKey=digitaleCollectieApiKey),
+                                        ),
+                                    ),
+                                    (SRUTermDrilldown(),),
+                                )
                             )
                         ),
                         (PathFilter('/static'),
@@ -199,7 +241,7 @@ def dna(reactor, config, statePath, out=stdout):
                         (PathFilter('/info/version'),
                             (StringServer(VERSION_STRING, ContentTypePlainText),)
                         ),
-                        (PathFilter('/', excluding=['/about', '/static', '/info', '/oai']),
+                        (PathFilter('/', excluding=['/about', '/static', '/info', '/oai', '/sru']),
                             (DynamicHtml([dynamicHtmlFilePath], reactor=reactor, indexPage='/index', additionalGlobals=additionalGlobals),
                                 (SummaryForRecordId(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort),),
                                 (erfGeoEnrichmentFromSummary,)
@@ -220,7 +262,7 @@ def startServer(configFile, stateDir):
     consume(server.once.observer_init())
     registerShutdownHandler(statePath=statePath, server=server, reactor=reactor)
 
-    print "Server listening on port", config['portNumber']
+    print "Server listening on port", config['erfgeoEnrich.portNumber']
     print "   - local state:", statePath
     stdout.flush()
     reactor.loop()

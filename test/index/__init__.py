@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -10,10 +8,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
-# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -33,26 +29,3 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 ## end license ##
-
-from seecrdeps import includeParentAndDeps       #DO_NOT_DISTRIBUTE
-includeParentAndDeps(__file__)                    #DO_NOT_DISTRIBUTE
-
-from seecr.utils import isRootUser
-from meresco.components import ParseArguments
-
-if __name__ == '__main__':
-    if isRootUser():
-        print "Do not run as root user!"
-        exit(2)
-
-    parser = ParseArguments()
-    parser.addOption('', '--port', type='int', help='The port', mandatory=True)
-    parser.addOption('', '--dataDirFirst', type='str', help='An optional first datadir')
-    parser.addOption('', '--dataDir', type='str', help='The main datadir', mandatory=True)
-    parser.addOption('', '--dataDirLast', type='str', help='An opitonal last datadir')
-    parser.addOption('', '--batchSize', type='int', help='The oai batch size')
-    options, arguments =  parser.parse()
-
-    from mockoaiserver import startServer
-    startServer(**vars(options))
-

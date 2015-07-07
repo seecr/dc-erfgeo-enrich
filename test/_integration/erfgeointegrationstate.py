@@ -34,10 +34,8 @@
 from os.path import isdir, join, abspath, dirname, basename
 from os import listdir, makedirs
 from shutil import rmtree
-from time import time
 from random import choice
 from StringIO import StringIO
-from traceback import print_exc
 
 from lxml.etree import parse
 
@@ -68,6 +66,10 @@ class ErfGeoIntegrationState(IntegrationState):
 
         self.erfGeoEnrichmentPort = PortNumberGenerator.next()
         self.erfGeoEnrichmentLocalStatePath = join(self.integrationTempdir, 'erfGeoEnrichmentLocal')
+
+        self.erfGeoEnrichmentIndexPort = PortNumberGenerator.next()
+        self.erfGeoEnrichmentIndexLocalStatePath = join(self.integrationTempdir, 'erfGeoEnrichmentIndexLocal')
+
         erfGeoRepositorySetsSelectionFile = join(self.erfGeoEnrichmentLocalStatePath, 'erfgeo_dc_sets.json')
         if not self.fastMode:
             clearOrCreateDir(self.erfGeoEnrichmentLocalStatePath)
@@ -87,7 +89,8 @@ class ErfGeoIntegrationState(IntegrationState):
             print "config[%s] = %s" % (repr(parameter), repr(value))
             config[parameter] = value
 
-        setConfig(config, 'portNumber', self.erfGeoEnrichmentPort)
+        setConfig(config, 'erfgeoEnrich.portNumber', self.erfGeoEnrichmentPort)
+        setConfig(config, 'erfgeoEnrich.index.portNumber', self.erfGeoEnrichmentIndexPort)
         setConfig(config, 'digitaleCollectie.host', 'localhost')
         setConfig(config, 'digitaleCollectie.port', self.digitaleCollectiePort)
         setConfig(config, 'erfgeo.searchApiBaseUrl', 'http://localhost:%s' % self.erfGeoApiPort)
@@ -108,9 +111,10 @@ class ErfGeoIntegrationState(IntegrationState):
         return result
 
     def setUp(self):
+        self._startMockErfGeoApi()
         self._startMockDigitaleCollectie()
         self._startErfGeoEnrichmentServer()
-        self._startMockErfGeoApi()
+        self._startErfGeoEnrichmentIndexServer()
         self._createDatabase()
 
     def tearDown(self):
@@ -120,7 +124,7 @@ class ErfGeoIntegrationState(IntegrationState):
     def _startMockDigitaleCollectie(self):
         self._startServer(
             serviceName='DigitaleCollectie-mock',
-            executable=join(mydir, 'testutils/start-mockoai'),
+            executable=join(mydir, 'testutils/start-mockdc'),
             serviceReadyUrl='http://localhost:%s/ready' % self.digitaleCollectiePort,
             port=self.digitaleCollectiePort,
             dataDir=join(self.testdataDir, 'dc_summaries')
@@ -134,6 +138,14 @@ class ErfGeoIntegrationState(IntegrationState):
             stateDir=self.erfGeoEnrichmentLocalStatePath,
             configFile=self.configFile)
 
+    def _startErfGeoEnrichmentIndexServer(self):
+        self._startServer(
+            serviceName='erfGeoEnrichmentIndex',
+            executable=self.binDir('erfgeo-enrichment-index-server'),
+            serviceReadyUrl='http://localhost:%s/info/version' % self.erfGeoEnrichmentIndexPort,
+            stateDir=self.erfGeoEnrichmentIndexLocalStatePath,
+            configFile=self.configFile)
+
     def _startMockErfGeoApi(self):
         self.mockErfGeoApi = MockServer(self.erfGeoApiPort)
         self.mockErfGeoApi.response = httputils.okHtml + open(join(self.testdataDir, 'api.erfgeo.nl/response.json')).read()
@@ -144,7 +156,7 @@ class ErfGeoIntegrationState(IntegrationState):
             print "Reusing database in", self.integrationTempdir
             return
         print "Creating database in", self.integrationTempdir
-        sleepWheel(8)  # give ErfGeoEnrichment service etc. some time to process and commit
+        sleepWheel(28)  # give ErfGeoEnrichment service etc. some time to process and commit
 
     def _uploadUpdateRequests(self, datadir, uploadPath, uploadPorts, filter=None):
         requests = (join(datadir, r) for r in sorted(listdir(datadir)) if r.endswith('.updateRequest'))

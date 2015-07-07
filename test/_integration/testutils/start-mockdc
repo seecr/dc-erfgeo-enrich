@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -8,8 +10,10 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
+# Copyright (C) 2012-2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2012-2014 Stichting Bibliotheek.nl (BNL) http://www.bibliotheek.nl
+# Copyright (C) 2015 Koninklijke Bibliotheek (KB) http://www.kb.nl
 # Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -30,31 +34,25 @@
 #
 ## end license ##
 
-from functools import partial
+from os.path import dirname                        #DO_NOT_DISTRIBUTE
+from seecrdeps import includeParentAndDeps         #DO_NOT_DISTRIBUTE
+includeParentAndDeps(dirname(dirname(__file__)))   #DO_NOT_DISTRIBUTE
 
-from meresco.xml import namespaces as _namespaces
-from meresco.xml.utils import createElement, createSubElement
+from seecr.utils import isRootUser
+from meresco.components import ParseArguments
 
+if __name__ == '__main__':
+    if isRootUser():
+        print "Do not run as root user!"
+        exit(2)
 
-namespaces = _namespaces.copyUpdate(dict(
-    dcoa="http://data.digitalecollectie.nl/ns/oa#",
-    geo="http://www.w3.org/2003/01/geo/wgs84_pos#",
-    geos="http://www.opengis.net/ont/geosparql#",
-    hg="http://schema.histograph.io/#",
-    oa="http://www.w3.org/ns/oa#",
-    vcard="http://www.w3.org/2006/vcard/ns#",
-))
+    parser = ParseArguments()
+    parser.addOption('', '--port', type='int', help='The port', mandatory=True)
+    parser.addOption('', '--dataDirFirst', type='str', help='An optional first datadir')
+    parser.addOption('', '--dataDir', type='str', help='The main datadir', mandatory=True)
+    parser.addOption('', '--dataDirLast', type='str', help='An opitonal last datadir')
+    parser.addOption('', '--batchSize', type='int', help='The oai batch size')
+    options, arguments =  parser.parse()
 
-def uriFromTag(tag):
-    return namespaces.expandNsUri(namespaces.prefixedTag(tag))
-namespaces.uriFromTag = uriFromTag
-
-xpath = namespaces.xpath
-xpathFirst = namespaces.xpathFirst
-expandNsUri = namespaces.expandNsUri
-expandNsTag = namespaces.expandNsTag
-curieToUri = namespaces.curieToUri
-curieToTag = namespaces.curieToTag
-
-createElement = partial(createElement, namespaces=namespaces)
-createSubElement = partial(createSubElement, namespaces=namespaces)
+    from test._integration.testutils.mockdcserver import startServer
+    startServer(**vars(options))
