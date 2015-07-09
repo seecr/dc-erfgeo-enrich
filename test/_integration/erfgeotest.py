@@ -90,28 +90,31 @@ class ErfGeoTest(IntegrationTestCase):
         body = self.getPage('/index')
         self.assertTrue('<h1>ErfGeo Verrijkingen</h1>' in body, body)
 
-    def testSru(self):
+    def testSruNumberOfHits(self):
         self.assertSruQuery(2, '*')
         self.assertSruQuery(1, 'dc:subject=Zeeoorlog')
         self.assertSruQuery(2, 'meta:repositoryGroupId exact "NIOD"')
 
+    def testSruRecordData(self):
+        responseLxml = self._doQuery('dc:subject=Zeeoorlog')
+        rdfXml = xpathFirst(responseLxml, '/srw:searchRetrieveResponse/srw:records/srw:record/srw:recordData/rdf:RDF')
+        self.assertEquals(2, len(rdfXml.getchildren()))
+        self.assertEquals('Verenigde Staten', xpathFirst(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dc:coverage/text()'))
+        self.assertEquals(1, len(xpath(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dcterms:spatial/hg:PlaceInTime')))
+
     def assertSruQuery(self, numberOfRecords, query, path=None, additionalHeaders=None):
         path = path or '/sru'
-        responseBody = self._doQuery({'query': query}, path=path, additionalHeaders=additionalHeaders)
+        responseBody = self._doQuery(query=query, path=path, additionalHeaders=additionalHeaders)
         diagnostic = xpathFirst(responseBody, "//diag:diagnostic")
         if not diagnostic is None:
             raise RuntimeError(lxmltostring(diagnostic))
         count = int(xpath(responseBody, "/srw:searchRetrieveResponse/srw:numberOfRecords/text()")[0])
         self.assertEquals(numberOfRecords, count)
 
-    def _doQuery(self, arguments, path=None, additionalHeaders=None, statusCode='200'):
+    def _doQuery(self, query, path=None, additionalHeaders=None, statusCode='200'):
         path = path or '/sru'
-        queryArguments = {'version': '1.1', 'operation': 'searchRetrieve'}
-        queryArguments.update(arguments)
+        queryArguments = {'query': query, 'version': '1.1', 'operation': 'searchRetrieve'}
         header, body = getRequest(self.erfGeoEnrichmentPort, path, queryArguments, parse=False, additionalHeaders=additionalHeaders)
-        print 'header:', header
-        print 'body:', body
-        from sys import stdout; stdout.flush()
         self.assertTrue(statusCode in header.split('\r\n', 1)[0])
         bodyLxml = XML(body)
         return bodyLxml

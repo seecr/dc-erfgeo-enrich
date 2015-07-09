@@ -42,7 +42,7 @@ from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDr
 from meresco.components.sru import SruParser, SruHandler
 from meresco.core import Observable, Transparent
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
-from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact
+from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact, XmlXPath, RewritePartname
 from meresco.components.http import ObservableHttpServer, PathFilter, FileServer, PathRename, ApacheLogger, StringServer, Deproxy
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.log import LogComponent
@@ -58,15 +58,16 @@ from digitalecollectie.erfgeo.adoptoaisetspecs import AdoptOaiSetSpecs
 from digitalecollectie.erfgeo.callstackdict import CallStackDict
 from digitalecollectie.erfgeo.erfgeoenrichmentfromsummary import ErfGeoEnrichmentFromSummary
 from digitalecollectie.erfgeo.erfgeoquery import ErfGeoQuery
-from digitalecollectie.erfgeo.index.erfgeoenrichmentcombinedwithsummary import ErfGeoEnrichmentCombinedWithSummary
+from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
+from digitalecollectie.erfgeo.maybecombinewithsummary import COMBINED_METADATA_PREFIX, MaybeCombineWithSummary
 from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
 from digitalecollectie.erfgeo.pittoannotation import PitToAnnotation
 from digitalecollectie.erfgeo.setsselection import SetsSelection
 from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
 from digitalecollectie.erfgeo.summarytoerfgeoenrichment import SummaryToErfGeoEnrichment
+from digitalecollectie.erfgeo.unprefixidentifier import UnprefixIdentifier
 from digitalecollectie.erfgeo.utils import getitem
-from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
 
 
 workingPath = dirname(abspath(__file__))
@@ -104,35 +105,61 @@ additionalGlobals = {
 }
 
 ERFGEO_ANNOTATION_METADATA_FORMAT = ('erfGeoEnrichment', '', namespaces.rdf)
+COMBINED_ANNOTATION_METADATA_FORMAT = (COMBINED_METADATA_PREFIX, '', namespaces.rdf)
+
+
+DC_OAI_PMH_ID_PREFIX = 'oai:data.digitalecollectie.nl:'
 
 def createUploadHelix(oaiJazz, storage, erfGeoEnrichmentFromSummary):
     return \
         (Transparent(),
             (FilterMessages(allowed=['delete']),
-                (SummaryToErfGeoEnrichment(),
-                    (oaiJazz,),
-                    (AddDeleteToMultiSequential(),
-                        (storage,),
+                (UnprefixIdentifier(prefix=DC_OAI_PMH_ID_PREFIX),
+                    (RewritePartname(partname='summary'),
+                        (AddDeleteToMultiSequential(),
+                            (storage,),
+                        ),
+                    ),
+                    (SummaryToErfGeoEnrichment(),
+                        (oaiJazz,),
+                        (AddDeleteToMultiSequential(),
+                            (storage,),
+                        )
                     )
                 )
             ),
             (FilterMessages(allowed=['add']),
-                (CallStackDict({
-                    'setSpecs':
-                    lambda lxmlNode, **kwargs: \
-                        set(xpath(lxmlNode, "oai:header/oai:setSpec/text()"))}),
-                    (SummaryToErfGeoEnrichment(),
-                        (erfGeoEnrichmentFromSummary,),
-                        (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data'),
-                            (AddDeleteToMultiSequential(),
-                                (storage,),
+                (UnprefixIdentifier(prefix=DC_OAI_PMH_ID_PREFIX),
+                    (CallStackDict({
+                        'setSpecs':
+                        lambda lxmlNode, **kwargs: \
+                            set(xpath(lxmlNode, "oai:header/oai:setSpec/text()"))}),
+                        (XmlXPath(['/oai:record/oai:metadata/rdf:RDF'], namespaces=namespaces, fromKwarg='lxmlNode'),
+                            (RewritePartname(partname='summary'),
+                                (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data'),
+                                    (AddDeleteToMultiSequential(),
+                                        (storage,),
+                                    )
+                                )
+                            ),
+                            (SummaryToErfGeoEnrichment(),
+                                (erfGeoEnrichmentFromSummary,),
+                                (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data'),
+                                    (AddDeleteToMultiSequential(),
+                                        (storage,),
+                                    )
+                                ),
+                                (OaiAddRecordWithDefaults(
+                                        metadataFormats=lambda **kwargs: [
+                                            ERFGEO_ANNOTATION_METADATA_FORMAT, COMBINED_ANNOTATION_METADATA_FORMAT
+                                        ]),
+                                    (AdoptOaiSetSpecs(),
+                                        (LogComponent('to oaiJazz'),),
+                                        (oaiJazz,)
+                                    )
+                                ),
                             )
-                        ),
-                        (OaiAddRecordWithDefaults(metadataFormats=lambda **kwargs: [ERFGEO_ANNOTATION_METADATA_FORMAT]),
-                            (AdoptOaiSetSpecs(),
-                                (oaiJazz,)
-                            )
-                        ),
+                        )
                     )
                 )
             )
@@ -211,11 +238,14 @@ def dna(reactor, config, statePath, out=stdout):
                                     supportXWait=True),
                                 (SeecrOaiWatermark(),),
                                 (oaiJazz,),
-                                (erfGeoEnrichmentStorage,),
+                                (LogComponent('to storage'),),
+                                (MaybeCombineWithSummary(),
+                                    (erfGeoEnrichmentStorage,),
+                                )
                             )
                         ),
                         (PathFilter("/sru"),
-                            (SruParser(defaultRecordSchema='summary+erfGeoEnrichment', defaultRecordPacking='xml'),
+                            (SruParser(defaultRecordSchema='erfGeoEnrichment+summary', defaultRecordPacking='xml'),
                                 (SruHandler(),
                                     (CqlMultiSearchClauseConversion(
                                           cqlClauseConverters,
@@ -224,10 +254,9 @@ def dna(reactor, config, statePath, out=stdout):
                                             (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
                                         ),
                                     ),
-                                    (ErfGeoEnrichmentCombinedWithSummary(),
+                                    (LogComponent('/sru to storage'),),
+                                    (MaybeCombineWithSummary(),
                                         (erfGeoEnrichmentStorage,),
-                                        (About(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort, digitaleCollectieApiKey=digitaleCollectieApiKey),
-                                        ),
                                     ),
                                     (SRUTermDrilldown(),),
                                 )

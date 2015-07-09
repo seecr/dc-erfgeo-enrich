@@ -51,7 +51,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
         coverageValues = xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()')
         return self._queryFromCoverageValues(coverageValues)
 
-    def annotationFromQuery(self, query, expectedType, targetUri=None):
+    def annotationFromQuery(self, query, expectedType=None, targetUri=None):
         pit = None
         if query:
             queryResults = yield self.any.queryErfGeoApi(query)

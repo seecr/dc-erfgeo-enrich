@@ -35,13 +35,12 @@ from meresco.lucene.remote import LuceneRemoteService
 
 from digitalecollectie.erfgeo import VERSION_STRING
 from digitalecollectie.erfgeo.namespaces import namespaces
-from digitalecollectie.erfgeo.about import About
+from digitalecollectie.erfgeo.maybecombinewithsummary import COMBINED_METADATA_PREFIX
 
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
 from digitalecollectie.erfgeo.index.lxmltofieldslist import LxmlToFieldsList
 from digitalecollectie.erfgeo.index.fieldslisttolucenedocument import FieldsListToLuceneDocument
 from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
-from digitalecollectie.erfgeo.index.erfgeoenrichmentcombinedwithsummary import ErfGeoEnrichmentCombinedWithSummary
 
 
 workingPath = dirname(abspath(__file__))
@@ -56,10 +55,7 @@ parseHugeOptions = dict(huge_tree=True, remove_blank_text=True)
 
 def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePath):
     erfgeoEnrichPortNumber = int(config['erfgeoEnrich.portNumber'])
-    digitaleCollectieHost = config.get('digitaleCollectie.host', '127.0.0.1')
-    digitaleCollectiePort = int(config['digitaleCollectie.port'])
-    digitaleCollectieApiKey = config.get('digitaleCollectie.apikey')
-    downloadName = 'erfgeoEnrich-erfGeoEnrichment'
+    downloadName = 'erfgeoEnrich-%s' % COMBINED_METADATA_PREFIX
     erfGeoEnrichPeriodicDownload = PeriodicDownload(
         reactor,
         host='127.0.0.1',
@@ -69,7 +65,7 @@ def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePa
 
     erfGeoEnrichOaiDownload = OaiDownloadProcessor(
         path='/oai',
-        metadataPrefix='erfGeoEnrichment',
+        metadataPrefix=COMBINED_METADATA_PREFIX,
         workingDirectory=join(statePath, 'harvesterstate/' + downloadName),
         xWait=True,
         name=downloadName,
@@ -87,15 +83,11 @@ def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePa
                         ),
                         (FilterMessages(allowed=['add']),
                             (XmlXPath(['/oai:record/oai:metadata/rdf:RDF'], namespaces=namespaces, fromKwarg='lxmlNode'),
-                                (ErfGeoEnrichmentCombinedWithSummary(),
-                                    (About(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort, digitaleCollectieApiKey=digitaleCollectieApiKey),
-                                    ),
-                                    (LxmlToFieldsList(),
-                                        (FieldsListToLuceneDocument(fieldRegistry, SummaryFields),
-                                            # TODO: index geo coordinates from WKT
-                                            (lucene,),
-                                            (termNumerator,),
-                                        )
+                                (LxmlToFieldsList(),
+                                    (FieldsListToLuceneDocument(fieldRegistry, SummaryFields),
+                                        # TODO: index geo coordinates from WKT
+                                        (lucene,),
+                                        (termNumerator,),
                                     )
                                 )
                             )

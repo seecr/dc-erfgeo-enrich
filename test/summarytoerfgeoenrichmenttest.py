@@ -94,24 +94,18 @@ class SummaryToErfGeoEnrichmentTest(SeecrTestCase):
             )
         )
         targetUri = 'target:uri'
-        consume(top.all.delete(identifier='oai:data.digitalecollectie.nl:' + SUMMARY_PROFILE.uriFor(targetUri)))
+        consume(top.all.delete(identifier=SUMMARY_PROFILE.uriFor(targetUri)))
         self.assertEquals(['delete'], observer.calledMethodNames())
         self.assertEquals(ERFGEO_ENRICHMENT_PROFILE.uriFor(targetUri), observer.calledMethods[0].kwargs['identifier'])
 
 
-INPUT = """<oai:record xmlns:oai="http://www.openarchives.org/OAI/2.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:oa="http://www.w3.org/ns/oa#">
-    <oai:header>
-    </oai:header>
-    <oai:metadata>
-        <rdf:RDF>
-            <oa:Annotation>
-                <oa:hasTarget rdf:resource="uri:target"/>
-                <oa:hasBody>
-                </oa:hasBody>
-            </oa:Annotation>
-        </rdf:RDF>
-    </oai:metadata>
-</oai:record>"""
+INPUT = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#">
+        <oa:hasTarget rdf:resource="uri:target"/>
+        <oa:hasBody>
+        </oa:hasBody>
+    </oa:Annotation>
+</rdf:RDF>"""
 
 ERFGEO_ANNOTATION = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:oa="http://www.w3.org/ns/oa#">
     <oa:Annotation>
