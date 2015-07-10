@@ -30,7 +30,7 @@ def initJVM():
 initJVM()
 
 from meresco.lucene import LuceneSettings, Lucene, CqlToLuceneQuery, TermNumerator
-from meresco.lucene.fieldregistry import FieldRegistry
+from meresco.lucene.fieldregistry import FieldRegistry, DOUBLEFIELD
 from meresco.lucene.remote import LuceneRemoteService
 
 from digitalecollectie.erfgeo import VERSION_STRING
@@ -40,15 +40,17 @@ from digitalecollectie.erfgeo.maybecombinewithsummary import COMBINED_METADATA_P
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
 from digitalecollectie.erfgeo.index.lxmltofieldslist import LxmlToFieldsList
 from digitalecollectie.erfgeo.index.fieldslisttolucenedocument import FieldsListToLuceneDocument
-from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
+from digitalecollectie.erfgeo.index.indexfields import IndexFields
 
 
 workingPath = dirname(abspath(__file__))
 
 unqualifiedTermFields = [(ALL_FIELD, 1.0)]
 
-fieldRegistry = FieldRegistry(drilldownFields=SummaryFields.drilldownFields)
-untokenizedFieldnames = [df.name for df in SummaryFields.drilldownFields]
+fieldRegistry = FieldRegistry(drilldownFields=IndexFields.drilldownFields)
+fieldRegistry.register('dcterms:spatial.geo:long', fieldDefinition=DOUBLEFIELD)
+fieldRegistry.register('dcterms:spatial.geo:lat', fieldDefinition=DOUBLEFIELD)
+untokenizedFieldnames = [df.name for df in IndexFields.drilldownFields]
 
 parseHugeOptions = dict(huge_tree=True, remove_blank_text=True)
 
@@ -84,7 +86,7 @@ def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePa
                         (FilterMessages(allowed=['add']),
                             (XmlXPath(['/oai:record/oai:metadata/rdf:RDF'], namespaces=namespaces, fromKwarg='lxmlNode'),
                                 (LxmlToFieldsList(),
-                                    (FieldsListToLuceneDocument(fieldRegistry, SummaryFields),
+                                    (FieldsListToLuceneDocument(fieldRegistry, IndexFields),
                                         # TODO: index geo coordinates from WKT
                                         (lucene,),
                                         (termNumerator,),

@@ -47,6 +47,7 @@ from meresco.core import Observable
 from meresco.components import lxmltostring, parseAbsoluteUrl
 
 from digitalecollectie.erfgeo.utils import getitem
+from digitalecollectie.erfgeo.geometry import Geometry
 
 
 class ErfGeoQuery(Observable):
@@ -78,7 +79,7 @@ class ErfGeoQuery(Observable):
                 pit['hgid'] = base + pit['hgid']
                 pit['source'] = base + pit['source']
                 geometryIndex = pit['geometryIndex']
-                pit['geometry'] = geometries[geometryIndex] if geometryIndex > -1 else None
+                pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
                 pits.append(pit)
             results.append((properties['type'], pits))
         return results

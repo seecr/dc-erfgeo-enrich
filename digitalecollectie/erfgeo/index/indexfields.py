@@ -1,9 +1,10 @@
 from meresco.lucene import DrilldownField, SORTED_PREFIX, UNTOKENIZED_PREFIX
 
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
+from digitalecollectie.erfgeo.geometry import Geometry, Point, MultiLineString, MultiPolygon
 
 
-class SummaryFields(object):
+class IndexFields(object):
     drilldownFields = [
         DrilldownField(name=UNTOKENIZED_PREFIX + fieldname, hierarchical=False, multiValued=True) for fieldname in [
             # in summary index
@@ -27,27 +28,58 @@ class SummaryFields(object):
 
     def fieldsFor(self, fieldname, value):
         fieldname = self._rename(fieldname)
-        if self._keep(fieldname):
-            yield fieldname, value
-            if self._inAll(fieldname):
-                yield ALL_FIELD, value
+        for fieldname, value in self._evaluate(fieldname, value):
+            if self._keep(fieldname):
+                print 'fieldname, value', fieldname, value
+                from sys import stdout; stdout.flush()
+                yield fieldname, value
+                if self._inAll(fieldname):
+                    yield ALL_FIELD, value
         yield self._untokenizedField(fieldname, value)
 
     def isSingleValueField(self, fieldname):
         return fieldname.startswith(SORTED_PREFIX)
 
     def _rename(self, fieldname):
-        base, postfix = splitLastSegment(fieldname)
-        if postfix in LABEL_TAGS:
-            fieldname = base
         for prefix, replacement in PREFIX_RENAMES:
             if fieldname.startswith(prefix):
                 fieldname = replacement + fieldname[len(prefix):]
+        base, postfix = splitLastSegment(fieldname)
+        if postfix in LABEL_TAGS:
+            fieldname = base
         return fieldname
 
     def _keep(self, fieldname):
         base, postfix = splitLastSegment(fieldname)
         return fieldname and not fieldname in UNWANTED_FIELDS and not postfix in UNWANTED_POSTFIXES
+
+    def _evaluate(self, fieldname, value):
+        if fieldname != 'dcterms:spatial.geos:hasGeometry.geos:asWKT':
+            yield fieldname, value
+            return
+        geometry = Geometry.parseWkt(value)
+        for (geoLong, geoLat) in geometry.pointCoordinates():
+            yield 'dcterms:spatial.geo:long', geoLong
+            yield 'dcterms:spatial.geo:lat', geoLat
+
+        # if isinstance(geometry, Point):
+        #     print 'Point'
+        #     from sys import stdout; stdout.flush()
+        #     yield 'dcterms:spatial.geo:long', geometry.coordinates[0]
+        #     yield 'dcterms:spatial.geo:lat', geometry.coordinates[1]
+        # elif isinstance(geometry, MultiPolygon):
+        #     print 'MultiPolygon'
+        #     from sys import stdout; stdout.flush()
+        #     for c in geometry.coordinates:
+        #         if type(c) == tuple:
+        #             yield 'dcterms:spatial.geo:long', c[0]
+        #             yield 'dcterms:spatial.geo:lat', c[1]
+        # elif isinstance(geometry, MultiLineString):
+        #     print 'MultiLineString'
+        #     from sys import stdout; stdout.flush()
+        #     yield 'dcterms:spatial.geo:long', geometry.coordinates[0][0]
+        #     yield 'dcterms:spatial.geo:lat', geometry.coordinates[0][1]
+
 
     def _inAll(self, fieldname):
         return not fieldname in EXCLUDED_FROM_ALL
@@ -80,13 +112,12 @@ PREFIX_RENAMES = [
     ('meta:baseurl', ''),
     ('meta:metadataPrefix', ''),
     ('meta:set', ''),
+    ('dcterms:spatial.hg:PlaceInTime', 'dcterms:spatial')
 ]
 UNWANTED_FIELDS = [
     #'oa:hasTarget.uri',
     'oa:motivatedBy.uri',
-    'dcterms:spatial.geo:lat',
-    'dcterms:spatial.geo:long',
     'dcterms:spatial.vcard:region',
 ]
-UNWANTED_POSTFIXES = set(['uri'])
-EXCLUDED_FROM_ALL = set([])
+UNWANTED_POSTFIXES = set(['uri'])  # Not so sure
+EXCLUDED_FROM_ALL = set(['dcterms:spatial.geo:long', 'dcterms:spatial.geo:lat'])

@@ -1,0 +1,49 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" rdf:about="http://data.digitalecollectie.nl/annotation/summary#bGltYnVyZ3NfZXJmZ29lZDpvYWk6bGU6Um9veU5ldDozNw==">
+    <oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/>
+    <oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#summarizing"/>
+    <oa:hasTarget rdf:resource="limburgs_erfgoed:oai:le:RooyNet:37"/>
+    <oa:hasBody>
+      <rdf:Description xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:meta="http://meresco.org/namespace/harvester/meta" xmlns:dcterms="http://purl.org/dc/terms/">
+        <dc:contributor>Provincie Limburg (limburgserfgoed.nl)</dc:contributor>
+        <dc:coverage>gemeente: Venray</dc:coverage>
+        <dc:coverage>dorp: Leunen</dc:coverage>
+        <dc:coverage>straat: Leunseweg</dc:coverage>
+        <dc:date>1951</dc:date>
+        <dc:date>1951</dc:date>
+        <dc:identifier>http://www.limburgserfgoed.nl/detail/RooyNet/37</dc:identifier>
+        <dc:language>nl-NL</dc:language>
+        <dc:subject>Zuivelfabriek Venray</dc:subject>
+        <dc:subject>Zuivelindustrie, melkfabriek</dc:subject>
+        <dc:title>Zuivelfabriek Venray</dc:title>
+        <dcterms:medium>foto</dcterms:medium>
+        <edm:type>IMAGE</edm:type>
+        <edm:dataProvider>RooyNet (limburgserfgoed.nl)</edm:dataProvider>
+        <edm:isShownAt rdf:resource="http://www.rooynet.nl/index.php?option=com_databank&amp;view=zoekresultaat&amp;controller=zoekresultaat&amp;resultaat=foto&amp;Itemid=114&amp;layout=detail&amp;limitstart=0&amp;q_objectid=37&amp;rm=list&amp;uitgebreid=0&amp;layout=detail&amp;limitstart=0"/>
+        <edm:isShownBy rdf:resource="http://www.rooynet.nl/assets/photo/thumbs-200/01/roy/00/001/import/25-09-2007/37.jpg"/>
+        <edm:object rdf:resource="http://www.rooynet.nl/assets/photo/thumbs-200/01/roy/00/001/import/25-09-2007/37.jpg"/>
+        <edm:provider>Digitale Collectie</edm:provider>
+        <edm:rights rdf:resource="http://www.europeana.eu/rights/rr-f/"/>
+        <prov:wasDerivedFrom>
+          <prov:Entity rdf:about="limburgs_erfgoed:oai:le:RooyNet:37">
+            <dcterms:identifier>oai:le:RooyNet:37</dcterms:identifier>
+            <prov:wasGeneratedBy>
+              <prov:Activity>
+                <rdfs:label>harvest</rdfs:label>
+                <prov:startedAtTime>2015-02-26T02:14:35</prov:startedAtTime>
+                <meta:repository>
+                  <rdf:Description>
+                    <dcterms:identifier>limburgs_erfgoed</dcterms:identifier>
+                    <meta:metadataPrefix>ese</meta:metadataPrefix>
+                    <meta:baseurl>http://www.limburgserfgoed.nl/oai</meta:baseurl>
+                    <meta:repositoryGroupId>limburgs_erfgoed</meta:repositoryGroupId>
+                  </rdf:Description>
+                </meta:repository>
+              </prov:Activity>
+            </prov:wasGeneratedBy>
+          </prov:Entity>
+        </prov:wasDerivedFrom>
+      </rdf:Description>
+    </oa:hasBody>
+  </oa:Annotation>
+</rdf:RDF>

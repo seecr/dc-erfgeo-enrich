@@ -57,8 +57,13 @@ class MockServer(Thread):
             if self.socket in r:
                 c, addr = self.socket.accept()
                 self.lastRequest = c.recv(4096)
-                c.send(self.response)
+                c.send(self.makeResponse(self.lastRequest))
                 c.close()
 
         self.socket.close()
 
+    def makeResponse(self, request):
+        if self.response:
+            return self.response
+        if self.reponses:
+            return self.responses.pop(0)

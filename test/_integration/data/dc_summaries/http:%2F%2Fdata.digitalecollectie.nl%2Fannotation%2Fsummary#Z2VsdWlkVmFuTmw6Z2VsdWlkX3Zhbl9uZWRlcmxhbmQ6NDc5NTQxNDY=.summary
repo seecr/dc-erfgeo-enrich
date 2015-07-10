@@ -1,0 +1,86 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" rdf:about="http://data.digitalecollectie.nl/annotation/summary#Z2VsdWlkVmFuTmw6Z2VsdWlkX3Zhbl9uZWRlcmxhbmQ6NDc5NTQxNDY="><oa:annotatedBy rdf:resource="http://data.digitalecollectie.nl/id/digitalecollectie"/><oa:motivatedBy rdf:resource="http://data.digitalecollectie.nl/ns/oa#summarizing"/><oa:hasTarget rdf:resource="geluidVanNl:geluid_van_nederland:47954146"/><oa:hasBody><rdf:Description xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:meta="http://meresco.org/namespace/harvester/meta" xmlns:dcterms="http://purl.org/dc/terms/"><dc:title>Het fluiten van een conducteur van de Blauwe Tram</dc:title>
+    <dc:description>Fluiten door de conducteur en tramfluit (exterieur) van de elektrische tram (Blauwe Tram) van de NZH (Amsterdam - Zandvoort)</dc:description>
+    <dc:subject>Eigen Opnames</dc:subject>
+    <dc:subject rdf:resource="http://data.beeldengeluid.nl/gtaa/217266"/>
+    <dc:subject>Blauwe tram</dc:subject>
+    <dc:subject rdf:resource="http://data.beeldengeluid.nl/gtaa/61593"/>
+    <dc:subject rdf:resource="http://data.beeldengeluid.nl/gtaa/218333"/>
+    <dc:type>sound effect</dc:type>
+    <dcterms:spatial rdf:resource="http://data.beeldengeluid.nl/gtaa/39742"/>
+    <dcterms:spatial rdf:resource="http://data.beeldengeluid.nl/gtaa/45159"/>
+    <dcterms:spatial rdf:resource="geo:52.37115,4.53336"/>
+    <edm:type>SOUND</edm:type>
+    <dc:publisher rdf:resource="http://www.geluidvannederland.nl"/>
+    <dc:creator rdf:resource="http://soundcloud.com/beeldengeluid"/>
+    <dcterms:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1955-1-1</dcterms:issued>
+    <dc:format>wav</dc:format>
+    <dcterms:extent>4363 ms</dcterms:extent>
+    <dc:identifier>47954146</dc:identifier>
+    <dc:type>Field recording</dc:type>
+    <dc:type>track</dc:type>
+    <dc:language>nl</dc:language>
+    <dc:rights>Creative Commons - Attribution-ShareAlike (BY-SA)</dc:rights>
+  <edm:dataProvider>Nederlands Instituut voor Beeld en Geluid</edm:dataProvider>
+    <edm:isShownAt rdf:resource="http://soundcloud.com/beeldengeluid/het-fluiten-van-een-1"/>
+    <edm:isShownBy rdf:resource="urn:soundcloud:47954146"/>
+    <edm:object rdf:resource="http://www.geluidvannederland.nl/sites/default/files/HGVN_logo_cirkels.png"/>
+    <edm:provider>Digitale Collectie</edm:provider>
+    <edm:rights rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/"/>
+  <prov:wasDerivedFrom><prov:Entity rdf:about="geluidVanNl:geluid_van_nederland:47954146"><dcterms:identifier>geluid_van_nederland:47954146</dcterms:identifier><prov:wasGeneratedBy><prov:Activity><rdfs:label>harvest</rdfs:label><prov:startedAtTime>2015-02-18T16:01:48Z</prov:startedAtTime><meta:repository><rdf:Description><dcterms:identifier>geluidVanNl</dcterms:identifier><meta:metadataPrefix>edm</meta:metadataPrefix><meta:baseurl>http://localhost:48080/oai</meta:baseurl><meta:repositoryGroupId>geluidVanNl</meta:repositoryGroupId></rdf:Description></meta:repository></prov:Activity></prov:wasGeneratedBy></prov:Entity></prov:wasDerivedFrom></rdf:Description></oa:hasBody></oa:Annotation><skos:Concept xmlns:skos="http://www.w3.org/2004/02/skos/core#" rdf:about="http://data.beeldengeluid.nl/gtaa/217266">
+    <skos:notation>217266</skos:notation>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/217336"/>
+    <skos:narrower rdf:resource="http://data.beeldengeluid.nl/gtaa/217403"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/217517"/>
+    <skos:broadMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/24882"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/217257"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/215864"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/216414"/>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/216188"/>
+    <skos:narrower rdf:resource="http://data.beeldengeluid.nl/gtaa/215378"/>
+    <skos:prefLabel xml:lang="nl">trams</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
+  </skos:Concept>
+  <skos:Concept xmlns:skos="http://www.w3.org/2004/02/skos/core#" rdf:about="http://data.beeldengeluid.nl/gtaa/61593">
+    <skos:notation>61593</skos:notation>
+    <skos:altLabel xml:lang="nl">Noord- en Zuidhollandse Vervoersmaatschappij</skos:altLabel>
+    <skos:scopeNote xml:lang="nl">Noord- en Zuidhollandse Vervoersmaatschappij</skos:scopeNote>
+    <skos:prefLabel xml:lang="nl">NZH</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/Namen"/>
+  </skos:Concept>
+  <skos:Concept xmlns:skos="http://www.w3.org/2004/02/skos/core#" rdf:about="http://data.beeldengeluid.nl/gtaa/218333">
+    <skos:notation>218333</skos:notation>
+    <skos:altLabel xml:lang="nl">blokfluiten</skos:altLabel>
+    <skos:broader rdf:resource="http://data.beeldengeluid.nl/gtaa/215695"/>
+    <skos:broadMatch rdf:resource="http://data.beeldengeluid.nl/gtaa/24895"/>
+    <skos:altLabel xml:lang="nl">dwarsfluiten</skos:altLabel>
+    <skos:narrower rdf:resource="http://data.beeldengeluid.nl/gtaa/231586"/>
+    <skos:prefLabel xml:lang="nl">fluiten</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/OnderwerpenBenG"/>
+  </skos:Concept>
+  <edm:Place xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:edm="http://www.europeana.eu/schemas/edm/" rdf:about="geo:52.37115,4.53336">
+    <geo:lat>52.37115</geo:lat>
+    <geo:long>4.53336</geo:long>
+  </edm:Place>
+  <edm:Place xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" rdf:about="http://data.beeldengeluid.nl/gtaa/39742">
+    <skos:notation>39742</skos:notation>
+    <skos:related rdf:resource="http://data.beeldengeluid.nl/gtaa/37778"/>
+    <skos:scopeNote xml:lang="nl">Europa</skos:scopeNote>
+    <skos:prefLabel xml:lang="nl">Nederland</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GeografischeNamen"/>
+  </edm:Place>
+  <edm:Place xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" rdf:about="http://data.beeldengeluid.nl/gtaa/45159">
+    <skos:notation>45159</skos:notation>
+    <skos:scopeNote xml:lang="nl">Nederland</skos:scopeNote>
+    <skos:prefLabel xml:lang="nl">Zandvoort</skos:prefLabel>
+    <skos:inScheme rdf:resource="http://data.beeldengeluid.nl/gtaa/GeografischeNamen"/>
+  </edm:Place>
+  <edm:Agent xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:foaf="http://xmlns.com/foaf/0.1/" rdf:about="http://www.geluidvannederland.nl">
+    <skos:prefLabel>Het Geluid van Nederland</skos:prefLabel>
+    <foaf:name>Het Geluid van Nederland</foaf:name>
+    <foaf:homepage rdf:resource="http://www.geluidvannederland.nl"/>
+  </edm:Agent>
+  <edm:Agent xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:foaf="http://xmlns.com/foaf/0.1/" rdf:about="http://soundcloud.com/beeldengeluid">
+    <skos:prefLabel>Nederlands Instituut voor Beeld en Geluid</skos:prefLabel>
+    <foaf:homepage rdf:resource="http://soundcloud.com/beeldengeluid"/>
+  </edm:Agent>
+  </rdf:RDF>

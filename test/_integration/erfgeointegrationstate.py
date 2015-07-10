@@ -147,8 +147,20 @@ class ErfGeoIntegrationState(IntegrationState):
             configFile=self.configFile)
 
     def _startMockErfGeoApi(self):
+        def makeResponse(request):
+            print 'request', request
+            from sys import stdout; stdout.flush()
+            for key, value in [
+                ('Verenigde+Staten', 'soestdijk'),
+                ('Leunseweg%2C+Leunen%2C+Venray', 'leunseweg-leunen-venray'),
+                ('GET', 'utrecht')
+            ]:
+                if key in request:
+                    print 'key', key
+                    from sys import stdout; stdout.flush()
+                    return httputils.okHtml + open(join(self.testdataDir, 'api.erfgeo.nl/%s.response.json' % value)).read()
         self.mockErfGeoApi = MockServer(self.erfGeoApiPort)
-        self.mockErfGeoApi.response = httputils.okHtml + open(join(self.testdataDir, 'api.erfgeo.nl/response.json')).read()
+        self.mockErfGeoApi.makeResponse = makeResponse
         self.mockErfGeoApi.start()
 
     def _createDatabase(self):
@@ -187,7 +199,8 @@ ERFGEO_SETS_SELECTION_JSON = """\
 [
     "NIOD",
     "limburgs_erfgoed",
-    "zeeuwse_bibliotheek"
+    "zeeuwse_bibliotheek",
+    "geluidVanNl"
 ]"""
 
 

@@ -58,7 +58,7 @@ from digitalecollectie.erfgeo.adoptoaisetspecs import AdoptOaiSetSpecs
 from digitalecollectie.erfgeo.callstackdict import CallStackDict
 from digitalecollectie.erfgeo.erfgeoenrichmentfromsummary import ErfGeoEnrichmentFromSummary
 from digitalecollectie.erfgeo.erfgeoquery import ErfGeoQuery
-from digitalecollectie.erfgeo.index.summaryfields import SummaryFields
+from digitalecollectie.erfgeo.index.indexfields import IndexFields
 from digitalecollectie.erfgeo.maybecombinewithsummary import COMBINED_METADATA_PREFIX, MaybeCombineWithSummary
 from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
@@ -81,7 +81,7 @@ IP_ADDRESS = gethostbyname(gethostname())
 drilldownFieldnames = [
     UNTOKENIZED_PREFIX + 'record.subject',
     UNTOKENIZED_PREFIX + 'meta.repository.repositoryGroupId',
-] + [df.name for df in SummaryFields.drilldownFields]
+] + [df.name for df in IndexFields.drilldownFields]
 
 untokenizedFieldnames = drilldownFieldnames[:]
 
@@ -145,6 +145,7 @@ def createUploadHelix(oaiJazz, storage, erfGeoEnrichmentFromSummary):
                             (SummaryToErfGeoEnrichment(),
                                 (erfGeoEnrichmentFromSummary,),
                                 (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data'),
+                                    (LogComponent('enrichment'),),
                                     (AddDeleteToMultiSequential(),
                                         (storage,),
                                     )

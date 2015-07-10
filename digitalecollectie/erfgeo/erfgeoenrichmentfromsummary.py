@@ -32,9 +32,10 @@
 
 from meresco.core import Observable
 
-from digitalecollectie.erfgeo.utils import first, getitem
+from digitalecollectie.erfgeo.utils import first
 from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
+from digitalecollectie.erfgeo.geometry import Point, MultiLineString, MultiPolygon
 
 
 class ErfGeoEnrichmentFromSummary(Observable):
@@ -61,8 +62,8 @@ class ErfGeoEnrichmentFromSummary(Observable):
     def selectPit(self, queryResults, expectedType=None):
         pits = None
         for queryResult in queryResults:
-            type, qrPits = queryResult
-            if expectedType is None or type == expectedType:
+            qrType, qrPits = queryResult
+            if expectedType is None or qrType == expectedType:
                 pits = qrPits
                 break
         if pits is None:
@@ -70,7 +71,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
         pits = sorted(
             pits,
             key=lambda pit: (
-                SHAPE_PRECEDENCE.get(getitem(pit.get('geometry'), 'type'), 0),
+                SHAPE_PRECEDENCE.get(type(pit.get('geometry')), 0),
                 pit.get('hasEnd', '2030-00-00'),
                 pit.get('hasBegin', '0000-00-00'),
             ),
@@ -104,4 +105,4 @@ LOCATION_PROPERTIES = [
     dict(dutchLabel='gemeente', expectedType='hg:Municipality'),
 ]
 
-SHAPE_PRECEDENCE = {'MultiPolygon': 3, 'MultiLineString': 2, 'Point': 1}
+SHAPE_PRECEDENCE = {MultiPolygon: 3, MultiLineString: 2, Point: 1}

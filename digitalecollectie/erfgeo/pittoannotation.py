@@ -112,34 +112,8 @@ class PitToAnnotation(Observable):
         yield '    <hg:sameHgConcept rdf:resource="%s"/>\n' % concept
 
     def _renderGeometry(self, geometry):
-        if not geometry['type'] in ['Point', 'MultiPolygon', 'MultiLineString']:
-            print 'skipping', geometry['type']
-            from sys import stdout; stdout.flush()
-            return
         yield '    <geos:hasGeometry>\n'
         yield '        <rdf:Description>\n'
-        yield '             <geos:asWKT>'
-        if geometry['type'] == 'Point':
-            yield 'POINT(%s)' % " ".join(str(c) for c in geometry['coordinates'])
-        elif geometry['type'] == 'MultiLineString':  # not yet tried
-            yield 'MULTILINESTRING(%s)' % ', '.join(
-                "(%s)" % ', '.join(
-                    ' '.join(str(c) for c in point)
-                    for point in lineString
-                )
-                for lineString in geometry['coordinates']
-            )
-        elif geometry['type'] == 'MultiPolygon':
-            yield 'MULTIPOLYGON(%s)' % ', '.join(
-                "(%s)" % ', '.join(
-                    "(%s)" % ', '.join(
-                        ' '.join(str(c) for c in point)
-                        for point in lineString
-                    )
-                    for lineString in polygon
-                )
-                for polygon in geometry['coordinates']
-            )
-        yield '</geos:asWKT>\n'
+        yield '             <geos:asWKT>%s</geos:asWKT>\n' % geometry.asWkt()
         yield '        </rdf:Description>\n'
         yield '    </geos:hasGeometry>\n'

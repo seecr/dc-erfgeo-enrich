@@ -45,34 +45,37 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals("Digitale Collectie ErfGeo enrichments", xpathFirst(body, '/oai:OAI-PMH/oai:Identify/oai:repositoryName/text()'))
 
     def testOaiListRecords(self):
-        header, body = getRequest(self.erfGeoEnrichmentPort, '/oai', {'verb': 'ListRecords', 'metadataPrefix': 'erfGeoEnrichment'})
-        self.assertEquals(2, len(xpath(body, '/oai:OAI-PMH/oai:ListRecords/oai:record')))
+        header, body = getRequest(self.erfGeoEnrichmentPort, '/oai', {'verb': 'ListRecords', 'metadataPrefix': 'erfGeoEnrichment'}, parse=False)
+        bodyLxml = XML(body)
+        self.assertEquals(4, len(xpath(bodyLxml, '/oai:OAI-PMH/oai:ListRecords/oai:record')))
+        d = dict(zip(
+            xpath(bodyLxml, '/oai:OAI-PMH/oai:ListRecords/oai:record/oai:metadata/rdf:RDF/oa:Annotation/oa:hasTarget/@rdf:resource'),
+            xpath(bodyLxml, '/oai:OAI-PMH/oai:ListRecords/oai:record/oai:metadata/rdf:RDF/oa:Annotation')))
+        self.assertEquals(set(['NIOD_BBWO2:niod:3366459', 'geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3441263', 'limburgs_erfgoed:oai:le:RooyNet:37']), set(d.keys()))
 
-        rdfElements = xpath(body, '/oai:OAI-PMH/oai:ListRecords/oai:record/oai:metadata/rdf:RDF')
-        rdf = rdfElements[0]
-        self.assertEquals('NIOD_BBWO2:niod:3441263', xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource'))
         # contains no location information to even construct a ErfGeo search API query from
-        self.assertEquals(None, xpathFirst(rdf, 'oa:Annotation/oa:hasBody'))
-        self.assertEquals('No ErfGeo search API query could be constructed from target record', xpathFirst(rdf, 'oa:Annotation/dcterms:description/text()'))
-        self.assertEquals(None, xpathFirst(rdf, 'oa:Annotation/dcterms:source/@rdf:resource'))
+        annotation = d['NIOD_BBWO2:niod:3441263']
+        self.assertEquals(None, xpathFirst(annotation, 'oa:hasBody'))
+        self.assertEquals('No ErfGeo search API query could be constructed from target record', xpathFirst(annotation, 'dcterms:description/text()'))
+        self.assertEquals(None, xpathFirst(annotation, 'dcterms:source/@rdf:resource'))
 
-        rdf = rdfElements[1]
-        self.assertEquals('http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', xpathFirst(rdf, 'oa:Annotation/@rdf:about'))
-        self.assertEquals('http://localhost:%s?q=Verenigde+Staten' % self.erfGeoApiPort, xpathFirst(rdf, 'oa:Annotation/dcterms:source/@rdf:resource'))
-        self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource'))
-        annotationBody = xpathFirst(rdf, 'oa:Annotation/oa:hasBody/rdf:Description')
+        annotation = d['NIOD_BBWO2:niod:3366459']
+        self.assertEquals('http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', xpathFirst(annotation, '@rdf:about'))
+        self.assertEquals('http://localhost:%s?q=Verenigde+Staten' % self.erfGeoApiPort, xpathFirst(annotation, 'dcterms:source/@rdf:resource'))
+        self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(annotation, 'oa:hasTarget/@rdf:resource'))
+        annotationBody = xpathFirst(annotation, 'oa:hasBody/rdf:Description')
         placeInTime = xpathFirst(annotationBody, 'dcterms:spatial/hg:PlaceInTime')
-        self.assertEquals('http://erfgeo.nl/hg/bestuurlijke-grenzen-provincies-actueel/26', xpathFirst(placeInTime, '@rdf:about'))
-        self.assertEquals('Utrecht', xpathFirst(placeInTime, 'rdfs:label/text()'))
+        self.assertEquals('http://erfgeo.nl/hg/geonames/2747032', xpathFirst(placeInTime, '@rdf:about'))
+        self.assertEquals('Soestdijk', xpathFirst(placeInTime, 'rdfs:label/text()'))
         geometryWKT = xpathFirst(placeInTime, 'geos:hasGeometry/rdf:Description/geos:asWKT/text()')
-        self.assertTrue(geometryWKT.startswith('MULTIPOLYGON((('), geometryWKT)
+        self.assertEquals('POINT(5.28472 52.19083)', geometryWKT)
 
     def testOaiSets(self):
         header, body = getRequest(self.erfGeoEnrichmentPort, '/oai', {'verb': 'GetRecord', 'identifier': 'http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', 'metadataPrefix': 'erfGeoEnrichment'})
         self.assertEquals(set(['NIOD']), set(xpath(body, '//oai:setSpec/text()')))
 
         header, body = getRequest(self.erfGeoEnrichmentPort, '/oai', {'verb': 'ListSets'})
-        self.assertEquals(set(['NIOD']), set(xpath(body, '//oai:setSpec/text()')))
+        self.assertEquals(set(['NIOD', 'limburgs_erfgoed', 'geluidVanNl']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testAbout(self):
         header, body = getRequest(self.erfGeoEnrichmentPort, '/about', {'uri': 'NIOD_BBWO2:niod:3366459', 'profile': 'erfGeoEnrichment'})
@@ -81,19 +84,30 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource'))
         annotationBody = xpathFirst(rdf, 'oa:Annotation/oa:hasBody/rdf:Description')
         placeInTime = xpathFirst(annotationBody, 'dcterms:spatial/hg:PlaceInTime')
-        self.assertEquals('http://erfgeo.nl/hg/bestuurlijke-grenzen-provincies-actueel/26', xpathFirst(placeInTime, '@rdf:about'))
-        self.assertEquals('Utrecht', xpathFirst(placeInTime, 'rdfs:label/text()'))
+        self.assertEquals('http://erfgeo.nl/hg/geonames/2747032', xpathFirst(placeInTime, '@rdf:about'))
+        self.assertEquals('Soestdijk', xpathFirst(placeInTime, 'rdfs:label/text()'))
         geometryWKT = xpathFirst(placeInTime, 'geos:hasGeometry/rdf:Description/geos:asWKT/text()')
-        self.assertTrue(geometryWKT.startswith('MULTIPOLYGON((('), geometryWKT)
+        self.assertEquals('POINT(5.28472 52.19083)', geometryWKT)
 
     def testMinimalWebPresence(self):
         body = self.getPage('/index')
         self.assertTrue('<h1>ErfGeo Verrijkingen</h1>' in body, body)
 
     def testSruNumberOfHits(self):
-        self.assertSruQuery(2, '*')
+        self.assertSruQuery(4, '*')
         self.assertSruQuery(1, 'dc:subject=Zeeoorlog')
         self.assertSruQuery(2, 'meta:repositoryGroupId exact "NIOD"')
+        self.assertSruQuery(1, 'dcterms:spatial=Soestdijk')
+        self.assertSruQuery(1, 'dcterms:spatial=Leunseweg')
+
+    def testSruGeoRangesNumberOfHits(self):
+        self.assertSruQuery(0, 'dcterms:spatial.geo:long<5')
+        self.assertSruQuery(1, 'dcterms:spatial.geo:long>4')
+        self.assertSruQuery(1, 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>52 AND dcterms:spatial.geo:lat<53')
+        self.assertSruQuery(0, 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>53 AND dcterms:spatial.geo:lat<54') # Soestdijk
+
+        self.assertSruQuery(1, 'dcterms:spatial.geo:long>5.97 AND dcterms:spatial.geo:long<5.98 AND dcterms:spatial.geo:lat>51.51 AND dcterms:spatial.geo:lat<51.52') # Leunseweg, Leunen, Venray
+
 
     def testSruRecordData(self):
         responseLxml = self._doQuery('dc:subject=Zeeoorlog')
