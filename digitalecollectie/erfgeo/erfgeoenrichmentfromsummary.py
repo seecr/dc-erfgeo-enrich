@@ -32,10 +32,10 @@
 
 from meresco.core import Observable
 
-from digitalecollectie.erfgeo.utils import first
-from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
 from digitalecollectie.erfgeo.geometry import Point, MultiLineString, MultiPolygon
+from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
+from digitalecollectie.erfgeo.utils import first
 
 
 class ErfGeoEnrichmentFromSummary(Observable):

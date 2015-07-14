@@ -45,21 +45,14 @@ class CallStackDict(Observable):
             __callstack_dict__ = local('__callstack_dict__')
         except AttributeError:
             __callstack_dict__ = {}
-
         for key, valueFunction in self._keyValueFunctions.items():
             __callstack_dict__[key] = valueFunction(**kwargs)
-
-        # print 'CallStackDict', __callstack_dict__
-        # from sys import stdout; stdout.flush()
-
         yield self.all.unknown(message, *args, **kwargs)
 
 
 def callStackDictGet(key, *args, **kwargs):
     try:
         d = local('__callstack_dict__')
-        # print 'callStackDictGet', d
-        # from sys import stdout; stdout.flush()
         return d[key]
     except (AttributeError, KeyError):
         if args or 'default' in kwargs:

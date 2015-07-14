@@ -31,9 +31,11 @@
 #
 ## end license ##
 
-from os.path import dirname
+from os.path import dirname, abspath
 from seecrdeps import includeParentAndDeps  #DO_NOT_DISTRIBUTE
-includeParentAndDeps(dirname(dirname(__file__)))  #DO_NOT_DISTRIBUTE
+includeParentAndDeps(dirname(dirname(abspath(__file__))))  #DO_NOT_DISTRIBUTE
+
+import sys; print 'path', sys.path; sys.stdout.flush()
 
 from collections import defaultdict
 
@@ -41,11 +43,11 @@ from simplejson import dump
 
 from meresco.oai.tools import iterateOaiPmh
 
-from natag.erfgeo.namespaces import xpath, xpathFirst
+from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
 
 
 def main():
-    for set in ['NIOD', 'zeeuwse_bibliotheek', 'limburgs_erfgoed', 'geluidVanNl']:
+    for set in ['rijksmuseum']: #'NIOD', 'zeeuwse_bibliotheek', 'limburgs_erfgoed', 'geluidVanNl']:
         print 'set', set
         from sys import stdout; stdout.flush()
         setValues = defaultdict(int)

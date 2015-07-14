@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -30,32 +31,13 @@
 #
 ## end license ##
 
-from functools import partial
+from urllib import urlopen
+from lxml.etree import parse, tostring
 
-from meresco.xml import namespaces as _namespaces
-from meresco.xml.utils import createElement, createSubElement
-
-
-namespaces = _namespaces.copyUpdate(dict(
-    dcoa="http://data.digitalecollectie.nl/ns/oa#",
-    geo="http://www.w3.org/2003/01/geo/wgs84_pos#",
-    geos="http://www.opengis.net/ont/geosparql#",
-    hg="http://schema.histograph.io/#",
-    oa="http://www.w3.org/ns/oa#",
-    vcard="http://www.w3.org/2006/vcard/ns#",
-))
-
-def uriFromTag(tag):
-    return namespaces.expandNsUri(namespaces.prefixedTag(tag))
-namespaces.uriFromTag = uriFromTag
-
-xpath = namespaces.xpath
-xpathFirst = namespaces.xpathFirst
-expandNsUri = namespaces.expandNsUri
-expandNsTag = namespaces.expandNsTag
-curieToUri = namespaces.curieToUri
-curieToTag = namespaces.curieToTag
-tagToCurie = namespaces.tagToCurie
-
-createElement = partial(createElement, namespaces=namespaces)
-createSubElement = partial(createSubElement, namespaces=namespaces)
+#input_ = urlopen("http://api.geonames.org/countryInfo?username=demo")
+input_ = open("/home/natag/countryInfo.xml")
+countryXml = parse(input_)
+# print tostring(countryXml)
+for countryNode in countryXml.xpath("/geonames/country"):
+    #print countryNode.xpath("countryName/text()")[0]
+    print 'http://sws.geonames.org/' + countryNode.xpath("geonameId/text()")[0]

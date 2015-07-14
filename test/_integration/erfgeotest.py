@@ -31,12 +31,14 @@
 #
 ## end license ##
 
-from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
+from lxml.etree import XML
 
 from seecr.test.utils import getRequest
 from seecr.test.integrationtestcase import IntegrationTestCase
+
 from meresco.components import lxmltostring
-from lxml.etree import XML
+
+from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
 
 
 class ErfGeoTest(IntegrationTestCase):
@@ -100,14 +102,13 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertSruQuery(1, 'dcterms:spatial=Soestdijk')
         self.assertSruQuery(1, 'dcterms:spatial=Leunseweg')
 
-    def testSruGeoRangesNumberOfHits(self):
-        self.assertSruQuery(0, 'dcterms:spatial.geo:long<5')
-        self.assertSruQuery(1, 'dcterms:spatial.geo:long>4')
-        self.assertSruQuery(1, 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>52 AND dcterms:spatial.geo:lat<53')
-        self.assertSruQuery(0, 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>53 AND dcterms:spatial.geo:lat<54') # Soestdijk
+    def testSruGeoRangesHits(self):
+        self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146']), 'dcterms:spatial.geo:long<5')
+        self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459', 'limburgs_erfgoed:oai:le:RooyNet:37']), 'dcterms:spatial.geo:long>4')
+        self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459']), 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>52 AND dcterms:spatial.geo:lat<53')
+        self.assertSruQuery(set([]), 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>53 AND dcterms:spatial.geo:lat<54')
 
-        self.assertSruQuery(1, 'dcterms:spatial.geo:long>5.97 AND dcterms:spatial.geo:long<5.98 AND dcterms:spatial.geo:lat>51.51 AND dcterms:spatial.geo:lat<51.52') # Leunseweg, Leunen, Venray
-
+        self.assertSruQuery(set(['limburgs_erfgoed:oai:le:RooyNet:37']), 'dcterms:spatial.geo:long>5.97 AND dcterms:spatial.geo:long<5.98 AND dcterms:spatial.geo:lat>51.51 AND dcterms:spatial.geo:lat<51.52') # Leunseweg, Leunen, Venray
 
     def testSruRecordData(self):
         responseLxml = self._doQuery('dc:subject=Zeeoorlog')
@@ -116,14 +117,19 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals('Verenigde Staten', xpathFirst(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dc:coverage/text()'))
         self.assertEquals(1, len(xpath(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dcterms:spatial/hg:PlaceInTime')))
 
-    def assertSruQuery(self, numberOfRecords, query, path=None, additionalHeaders=None):
+    def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'
         responseBody = self._doQuery(query=query, path=path, additionalHeaders=additionalHeaders)
         diagnostic = xpathFirst(responseBody, "//diag:diagnostic")
         if not diagnostic is None:
             raise RuntimeError(lxmltostring(diagnostic))
+        targetUris = set(xpath(responseBody, "/srw:searchRetrieveResponse/srw:records/srw:record/srw:recordData/rdf:RDF/oa:Annotation/oa:hasTarget/@rdf:resource"))
         count = int(xpath(responseBody, "/srw:searchRetrieveResponse/srw:numberOfRecords/text()")[0])
-        self.assertEquals(numberOfRecords, count)
+        if type(expectedHits) is int:
+            self.assertEquals(expectedHits, count)
+        else:
+            self.assertEquals(expectedHits, targetUris)
+            self.assertEquals(len(expectedHits), count)
 
     def _doQuery(self, query, path=None, additionalHeaders=None, statusCode='200'):
         path = path or '/sru'

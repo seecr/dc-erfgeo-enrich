@@ -1,7 +1,39 @@
+## begin license ##
+#
+# "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
+# geographical enrichments for records in "Digitale Collectie" (http://digitalecollectie.nl)
+# by querying the ErfGeo search API (https://erfgeo.nl/search).
+# "Digitale Collectie ErfGeo Enrichment" is developed for Stichting DEN (http://www.den.nl)
+# and the Netherlands Institute for Sound and Vision (http://instituut.beeldengeluid.nl/)
+# by Seecr (http://seecr.nl).
+# The project is based on the open source project Meresco (http://meresco.org).
+#
+# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015 Stichting DEN http://www.den.nl
+#
+# This file is part of "Digitale Collectie ErfGeo Enrichment"
+#
+# "Digitale Collectie ErfGeo Enrichment" is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# "Digitale Collectie ErfGeo Enrichment" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "Digitale Collectie ErfGeo Enrichment"; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+## end license ##
+
 from meresco.lucene import DrilldownField, SORTED_PREFIX, UNTOKENIZED_PREFIX
 
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
-from digitalecollectie.erfgeo.geometry import Geometry, Point, MultiLineString, MultiPolygon
+from digitalecollectie.erfgeo.geometry import Geometry
 
 
 class IndexFields(object):
@@ -30,8 +62,8 @@ class IndexFields(object):
         fieldname = self._rename(fieldname)
         for fieldname, value in self._evaluate(fieldname, value):
             if self._keep(fieldname):
-                print 'fieldname, value', fieldname, value
-                from sys import stdout; stdout.flush()
+                # print 'fieldname, value', fieldname, value
+                # from sys import stdout; stdout.flush()
                 yield fieldname, value
                 if self._inAll(fieldname):
                     yield ALL_FIELD, value
@@ -54,32 +86,19 @@ class IndexFields(object):
         return fieldname and not fieldname in UNWANTED_FIELDS and not postfix in UNWANTED_POSTFIXES
 
     def _evaluate(self, fieldname, value):
-        if fieldname != 'dcterms:spatial.geos:hasGeometry.geos:asWKT':
-            yield fieldname, value
+        if fieldname == 'dcterms:spatial.geos:hasGeometry.geos:asWKT':
+            geometry = Geometry.parseWkt(value)
+            for (geoLong, geoLat) in geometry.pointCoordinates():
+                yield 'dcterms:spatial.geo:long', geoLong
+                yield 'dcterms:spatial.geo:lat', geoLat
             return
-        geometry = Geometry.parseWkt(value)
-        for (geoLong, geoLat) in geometry.pointCoordinates():
-            yield 'dcterms:spatial.geo:long', geoLong
-            yield 'dcterms:spatial.geo:lat', geoLat
-
-        # if isinstance(geometry, Point):
-        #     print 'Point'
-        #     from sys import stdout; stdout.flush()
-        #     yield 'dcterms:spatial.geo:long', geometry.coordinates[0]
-        #     yield 'dcterms:spatial.geo:lat', geometry.coordinates[1]
-        # elif isinstance(geometry, MultiPolygon):
-        #     print 'MultiPolygon'
-        #     from sys import stdout; stdout.flush()
-        #     for c in geometry.coordinates:
-        #         if type(c) == tuple:
-        #             yield 'dcterms:spatial.geo:long', c[0]
-        #             yield 'dcterms:spatial.geo:lat', c[1]
-        # elif isinstance(geometry, MultiLineString):
-        #     print 'MultiLineString'
-        #     from sys import stdout; stdout.flush()
-        #     yield 'dcterms:spatial.geo:long', geometry.coordinates[0][0]
-        #     yield 'dcterms:spatial.geo:lat', geometry.coordinates[0][1]
-
+        if fieldname == 'dcterms:spatial.uri':
+            if value.startswith('geo:'):
+                geoLat, _, geoLong = value[len('geo:'):].partition(',')
+                yield 'dcterms:spatial.geo:long', geoLong
+                yield 'dcterms:spatial.geo:lat', geoLat
+            return
+        yield fieldname, value
 
     def _inAll(self, fieldname):
         return not fieldname in EXCLUDED_FROM_ALL
