@@ -30,6 +30,8 @@
 #
 ## end license ##
 
+import re
+
 from meresco.core import Observable
 
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
@@ -49,13 +51,13 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
     def queryFromSummary(self, summary):
         annotationBody = xpathFirst(summary, 'oa:Annotation/oa:hasBody/*')
-        coverageValues = xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()')
+        coverageValues = [s.strip() for s in (xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()'))]
         return self._queryFromCoverageValues(coverageValues)
 
     def annotationFromQuery(self, query, expectedType=None, targetUri=None):
         pit = None
         if query:
-            queryResults = yield self.any.queryErfGeoApi(query)
+            queryResults = yield self.any.queryErfGeoApi(query, expectedType=expectedType)
             pit = self.selectPit(queryResults, expectedType=expectedType)
         raise StopIteration(self.call.toAnnotation(pit, targetUri, query))
 
@@ -80,12 +82,17 @@ class ErfGeoEnrichmentFromSummary(Observable):
         return pit
 
     def _queryFromCoverageValues(self, coverageValues):
-        locationValues, expectedType = coverageValues, None
+        locationValues, expectedType = self._recognizeLocationKeyValues(coverageValues)
+        locationValues, expectedType = self._recognizedParenthesizedParts(locationValues, expectedType)
+        return ', '.join(locationValues), expectedType
+
+    def _recognizeLocationKeyValues(self, locationValues):
+        expectedType = None
         locationProperties = {}
-        for coverageValue in coverageValues:
+        for locationValue in locationValues:
             for locationProperty in LOCATION_PROPERTIES:
                 key = locationProperty['dutchLabel']
-                _, keyFound, value = coverageValue.partition("%s: " % key)
+                _, keyFound, value = locationValue.partition("%s: " % key)
                 if keyFound:
                     locationProperties[key] = value
         if locationProperties:
@@ -96,13 +103,39 @@ class ErfGeoEnrichmentFromSummary(Observable):
             ]
             locationValues = [d['value'] for d in sortedLocationProperties]
             expectedType = sortedLocationProperties[0]['expectedType']
-        return ', '.join(locationValues), expectedType
+        return locationValues, expectedType
+
+    def _recognizedParenthesizedParts(self, locationValues, expectedType):
+        for i, locationValue in enumerate(locationValues):
+            m = PARENTHESIZED.match(locationValue)
+            if not m is None:
+                head = m.group(1).strip()
+                scope = m.group(2).strip()
+                tail = m.group(3).strip()
+                if scope in TYPE_MARKERS:
+                    if not expectedType:
+                        expectedType = TYPE_MARKERS[scope]
+                    scope = None
+                locationValues[i] = ', '.join(v for v in [head, scope, tail] if v)
+        return locationValues, expectedType
 
 
 LOCATION_PROPERTIES = [
     dict(dutchLabel='straat', expectedType='hg:Street'),
     dict(dutchLabel='dorp', expectedType='hg:Place'),
     dict(dutchLabel='gemeente', expectedType='hg:Municipality'),
+    # Note: 'postcode:' is also used, but currently not useful for matching
 ]
+
+PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
+
+TYPE_MARKERS = {
+    'stad': 'hg:Place',
+    'plaats': 'hg:Place',
+    'provincie': 'hg:Province',
+    'waterschap': None,
+    'eiland': None,
+    '?': None
+}
 
 SHAPE_PRECEDENCE = {MultiPolygon: 3, MultiLineString: 2, Point: 1}
