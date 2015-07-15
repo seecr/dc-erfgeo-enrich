@@ -39,7 +39,7 @@ def header(session=None, titleSuffix='', backLink=None, **kwargs):
         <head>
             <title>Digitale Collectie: ErfGeo Verrijkingen %s</title>
             <link href="/static/seecr/css/seecr.css" rel="stylesheet" type="text/css" />
-            <link href="/static/natag.css" rel="stylesheet" type="text/css" />
+            <link href="/static/dc-erfgeo-enrich.css" rel="stylesheet" type="text/css" />
             <script type="text/javascript" src="/static/js/jquery-1.11.0.min.js"></script>
         </head>\n""" % titleSuffix
 

@@ -43,9 +43,9 @@ def main(arguments=None, **kwargs):
         <form action="/query" method="POST">
             <dl>
                 <dt>Zoektermen</dt>
-                <dd><input type="text" name="query"></dd>
+                <dd><input type="text" name="query" size="60"></dd>
             </dl>
-            <button id="submit" type="submit">Bevraag HistoGraph</button>
+            <button id="submit" type="submit">Bevraag ErfGeo API</button>
         </form>
     </div>'''
 
@@ -53,9 +53,9 @@ def main(arguments=None, **kwargs):
         <form action="/query" method="POST">
             <dl>
                 <dt>record id</dt>
-                <dd><input type="text" name="recordId"></dd>
+                <dd><input type="text" name="recordId" size="60"></dd>
             </dl>
-            <button id="submit" type="submit">Bevraag HistoGraph</button>
+            <button id="submit" type="submit">Bevraag ErfGeo API</button>
         </form>
     </div>'''
 
