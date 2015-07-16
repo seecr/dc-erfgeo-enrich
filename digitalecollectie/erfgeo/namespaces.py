@@ -54,6 +54,7 @@ xpathFirst = namespaces.xpathFirst
 expandNsUri = namespaces.expandNsUri
 expandNsTag = namespaces.expandNsTag
 curieToUri = namespaces.curieToUri
+uriToCurie = namespaces.uriToCurie
 curieToTag = namespaces.curieToTag
 tagToCurie = namespaces.tagToCurie
 

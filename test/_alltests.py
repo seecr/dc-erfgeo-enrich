@@ -46,6 +46,7 @@ from callstackdicttest import CallStackDictTest
 from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
 from oaisetsharvestertest import OaiSetsHarvesterTest
 from pittoannotationtest import PitToAnnotationTest
+from searchjsonresponsetest import SearchJsonResponseTest
 from setsselectiontest import SetsSelectionTest
 from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
 from unprefixidentifiertest import UnprefixIdentifierTest

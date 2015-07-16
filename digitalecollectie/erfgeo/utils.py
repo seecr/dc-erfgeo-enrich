@@ -41,6 +41,12 @@ def first(l, default=None):
             return v
     return default
 
+def indexOf(e, l):
+    try:
+        return l.index(e)
+    except ValueError:
+        return -1
+
 
 class Bucket(object):
     def __init__(self, **kwargs):

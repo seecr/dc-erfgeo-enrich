@@ -36,6 +36,7 @@ from os.path import join, dirname, abspath, isfile
 from socket import gethostname, gethostbyname
 
 from weightless.core import be, consume
+from weightless.http import HttpRequest
 from weightless.io import Reactor
 
 from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
@@ -64,6 +65,7 @@ from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
 from digitalecollectie.erfgeo.pittoannotation import PitToAnnotation
 from digitalecollectie.erfgeo.setsselection import SetsSelection
+from digitalecollectie.erfgeo.searchjsonresponse import SearchJsonResponse
 from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
 from digitalecollectie.erfgeo.summarytoerfgeoenrichment import SummaryToErfGeoEnrichment
 from digitalecollectie.erfgeo.unprefixidentifier import UnprefixIdentifier
@@ -263,6 +265,11 @@ def dna(reactor, config, statePath, out=stdout):
                                 )
                             )
                         ),
+                        (PathFilter('/search'),
+                            (SearchJsonResponse(sruPort=portNumber, sruPath='/sru'),
+                                (HttpRequest(),)
+                            )
+                        ),
                         (PathFilter('/static'),
                             (PathRename(lambda path: path[len('/static'):]),
                                 (FileServer(staticHtmlFilePath),)
@@ -271,7 +278,7 @@ def dna(reactor, config, statePath, out=stdout):
                         (PathFilter('/info/version'),
                             (StringServer(VERSION_STRING, ContentTypePlainText),)
                         ),
-                        (PathFilter('/', excluding=['/about', '/static', '/info', '/oai', '/sru']),
+                        (PathFilter('/', excluding=['/about', '/static', '/info', '/oai', '/sru', '/search']),
                             (DynamicHtml([dynamicHtmlFilePath], reactor=reactor, indexPage='/index', additionalGlobals=additionalGlobals),
                                 (SummaryForRecordId(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort),),
                                 (erfGeoEnrichmentFromSummary,)
