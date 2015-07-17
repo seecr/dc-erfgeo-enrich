@@ -41,6 +41,7 @@ from weightless.io import Reactor
 
 from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
 from meresco.components.sru import SruParser, SruHandler
+from meresco.components.http.utils import redirectHttp
 from meresco.core import Observable, Transparent
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
 from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact, XmlXPath, RewritePartname
@@ -103,6 +104,7 @@ def staticFileExists(filepath):
 additionalGlobals = {
     'getitem': getitem,
     'lxmltostring': lxmltostring,
+    'redirectHttp': redirectHttp,
     'staticFileExists': staticFileExists,
 }
 

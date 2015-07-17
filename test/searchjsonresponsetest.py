@@ -30,17 +30,25 @@ class SearchJsonResponseTest(SeecrTestCase):
                 )
             )
         )
-        result = asString(top.all.handleRequest(arguments={'query': 'fiets'}))
+        result = asString(top.all.handleRequest(arguments={'query': ['fiets']}))
         self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%3A200%2Cdc%3Asubject%3A20', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         result = loads(body, parse_float=Decimal)
         result = result['result']
+        self.assertEquals('/search?query=fiets', result['request'])
+        self.assertEquals('/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%3A200%2Cdc%3Asubject%3A20', result['sruRequest'])
         self.assertEquals(1, result['total'])
         self.assertEquals(result['total'], len(result['items']))
         self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['@id'])
         facets = result['facets']
         self.assertEquals([{'count': 1, 'value': 'RooyNet (limburgserfgoed.nl)'}], facets['edm:dataProvider'])
-        self.assertEquals([{'count': 1, 'value': 'Zuivelfabriek Venray'}, {'count': 1, 'value': 'Zuivelindustrie, melkfabriek'}], facets['dc:subject'])
+        self.assertEquals([
+                {'count': 1, 'value': 'Zuivelfabriek Venray'},
+                {'count': 1, 'value': 'Zuivelindustrie, melkfabriek'}
+            ], facets['dc:subject'])
+
+    def testFacetsWithHref(self):
+        self.fail()
 
     def testSummaryWithEnrichmentToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT))

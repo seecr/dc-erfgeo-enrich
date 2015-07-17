@@ -4,7 +4,6 @@ from urllib import urlencode
 from simplejson import dumps
 from lxml.etree import XML, Element
 
-from meresco.components import lxmltostring
 from meresco.core import Observable
 from meresco.components.http.utils import CRLF
 
@@ -19,40 +18,52 @@ class SearchJsonResponse(Observable):
         self._sruPath = sruPath
 
     def handleRequest(self, **kwargs):
-        request = self._sruPath
+        sruRequest = self._sruPath
         headers = kwargs.get('Headers', {})
         arguments = kwargs.get('arguments')
-        arguments = self._rewriteArgumentsForSru(arguments)
-        if arguments:
-            request = request + '?' + urlencode(arguments, doseq=True)
-        response = yield self.any.httprequest(host='127.0.0.1', port=self._sruPort, request=request, headers=headers)
+        sruArguments = self._rewriteArgumentsForSru(arguments)
+        if sruArguments:
+            sruRequest = sruRequest + '?' + urlencode(sruArguments, doseq=True)
+        response = yield self.any.httprequest(host='127.0.0.1', port=self._sruPort, request=sruRequest, headers=headers)
         header, body = response.split(CRLF * 2)
-        jsonResponse = self._sruResponseToJson(XML(body), request)
+        jsonResponse = self._sruResponseToJson(arguments=arguments, sruResponseLxml=XML(body), sruRequest=sruRequest)
         yield 'HTTP/1.0 200 OK' + CRLF
         yield 'Content-Type: application/json' + CRLF * 2
         yield jsonResponse
 
     def _rewriteArgumentsForSru(self, arguments):
-        arguments = dict(arguments, version=['1.1'], operation=['searchRetrieve'])
+        sruArguments = dict(arguments, version=['1.1'], operation=['searchRetrieve'])
         if not 'x-termdrilldown' in arguments:
-            arguments['x-term-drilldown'] = ['edm:dataProvider:200,dc:subject:20']
+            sruArguments['x-term-drilldown'] = ['edm:dataProvider:200,dc:subject:20']
         # TODO: startRecord, maxRecords
-        return arguments
+        return sruArguments
 
-    def _sruResponseToJson(self, sruResponseLxml, sruRequest):
-        result = dict(sruRequest=sruRequest, total=int(xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:numberOfRecords/text()')))
+    def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
+        request = '/search?' + urlencode(arguments, doseq=True)
+        total = int(xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:numberOfRecords/text()'))
+        result = dict(
+            request=request,
+            sruRequest=sruRequest,
+            total=total
+        )
         result['items'] = [summaryWithEnrichmentToJsonLd(rdf) for rdf in xpath(sruResponseLxml, '/srw:searchRetrieveResponse/srw:records/srw:record/srw:recordData/rdf:RDF')]
         facets = {}
         for navigator in xpath(sruResponseLxml, '/srw:searchRetrieveResponse/srw:extraResponseData/drilldown:drilldown/drilldown:term-drilldown/drilldown:navigator'):
             name = xpathFirst(navigator, '@name')
             facetEntries = []
             for ddItem in xpath(navigator, 'drilldown:item'):
-                facetEntries.append(dict(value=xpathFirst(ddItem, 'text()'), count=int(xpathFirst(ddItem, '@count'))))
+                value = xpathFirst(ddItem, 'text()')
+                count = int(xpathFirst(ddItem, '@count'))
+                facetEntry = dict(value=value, count=count)
+                if count != total:
+                    newQuery = arguments['query'][0] + ' AND %s exact "%s"' % (name, value)
+                    facetEntry['href'] = '/search?' + urlencode(dict(arguments, query=newQuery), doseq=True) # TODO: what if no query?
+                facetEntries.append(facetEntry)
             facets[name] = facetEntries
         if facets:
             result['facets'] = facets
         d = dict(result=result)
-        return dumps(d, indent=4, use_decimal=True, item_sort_key=lambda item: indexOf(item[0], ['total', 'items', 'facets', 'sruRequest']))
+        return dumps(d, indent=4, use_decimal=True, item_sort_key=lambda item: (indexOf(item[0], ['request', 'total', 'items', 'facets', 'sruRequest']), item[0]))
 
 
 def summaryWithEnrichmentToJsonLd(rdf):
@@ -63,8 +74,8 @@ def summaryWithEnrichmentToJsonLd(rdf):
         if uri:
             d['@id'] = uri
         elementCurie = tagToCurie(element.tag)
-        if elementCurie != 'rdf:Description':
-            d['@type'] = elementCurie  # TODO: ignore some types
+        if elementCurie != 'rdf:Description' and not elementCurie in TYPES_TO_IGNORE:
+            d['@type'] = elementCurie
         for child in element.iterchildren(tag=Element):
             processRelationElement(d, child)
 
@@ -84,8 +95,10 @@ def summaryWithEnrichmentToJsonLd(rdf):
             objects.append(value)
         uri = xpathFirst(element, '@rdf:resource')
         if uri:
-            if elementCurie == 'rdf:type':   # TODO: ignore some types
-                d['@type'] = uriToCurie(uri)  # Note: overrides resource Element tag type (this is more specific in context of ErfGeo enrichment)
+            if elementCurie == 'rdf:type':
+                typeCurie = uriToCurie(uri)
+                if not typeCurie in TYPES_TO_IGNORE:
+                    d['@type'] = typeCurie
                 return
             value = uri
             if not uri in urisResolved:
@@ -132,3 +145,5 @@ RESOURCE_RELATIONS = set([
 DECIMAL_VALUE_RELATIONS = set(['geo:lat', 'geo:long'])
 
 SINGLE_LITERAL_VALUE_RELATIONS = set(['geo:lat', 'geo:long', 'skos:prefLabel'])
+
+TYPES_TO_IGNORE = set(['edm:Place', 'hg:PlaceInTime', 'oa:Annotation'])

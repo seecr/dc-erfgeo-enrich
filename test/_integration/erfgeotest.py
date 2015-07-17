@@ -39,6 +39,8 @@ from seecr.test.integrationtestcase import IntegrationTestCase
 from meresco.components import lxmltostring
 
 from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
+from simplejson import loads
+from decimal import Decimal
 
 
 class ErfGeoTest(IntegrationTestCase):
@@ -116,6 +118,14 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(2, len(rdfXml.getchildren()))
         self.assertEquals('Verenigde Staten', xpathFirst(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dc:coverage/text()'))
         self.assertEquals(1, len(xpath(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dcterms:spatial/hg:PlaceInTime')))
+
+    def testSearchApi(self):
+        body = self.getPage('/search?query=Zeeoorlog')
+        d = loads(body, parse_float=Decimal)
+        self.assertEquals(1, d['result']['total'])
+        spatial = d['result']['items'][0]['dcterms:spatial'][0]
+        self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
+        self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
 
     def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'

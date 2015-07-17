@@ -37,11 +37,16 @@ import page
 def main(Body=None, **kwargs):
     arguments = parse_qs(Body)
     query = getitem(arguments, 'query', [None])[0]
+    erfGeoQuery = getitem(arguments, 'erfGeoQuery', [None])[0]
     recordId = getitem(arguments, 'recordId', [None])[0]
 
     annotation = ''
     if query:
-        annotation = yield observable.any.annotationFromQuery(query)
+        redirectUrl = '/search?' + urlencode(dict(query=query))
+        yield redirectHttp % redirectUrl
+        return
+    elif erfGeoQuery:
+        annotation = yield observable.any.annotationFromQuery(erfGeoQuery)
     elif recordId:
         yield '<!-- Find summary for: %s -->\n' % recordId
         summary = None
@@ -53,7 +58,7 @@ def main(Body=None, **kwargs):
             return
         uri, annotation = yield observable.any.annotationFromSummary(summary)
     else:
-        yield '''<!-- Neither 'query' or 'recordId' argument provided. -->\n'''
+        yield '''<!-- Neither 'query', 'erfGeoQuery' or 'recordId' argument provided. -->\n'''
 
     if not annotation is None:
         yield lxmltostring(annotation)
