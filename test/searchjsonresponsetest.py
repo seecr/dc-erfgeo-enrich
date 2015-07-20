@@ -18,7 +18,7 @@ class SearchJsonResponseTest(SeecrTestCase):
         httpRequests = []
         def mockHttprequest(**kwargs):
             httpRequests.append(kwargs)
-            response = 'HTTP/1.0 200 OK' + 2 * CRLF + SRU_RESPONSE
+            response = 'HTTP/1.0 200 OK' + 2 * CRLF + ONE_HIT_SRU_RESPONSE
             raise StopIteration(response)
             yield
 
@@ -31,12 +31,12 @@ class SearchJsonResponseTest(SeecrTestCase):
             )
         )
         result = asString(top.all.handleRequest(arguments={'query': ['fiets']}))
-        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%3A200%2Cdc%3Asubject%3A20', 'port': 3333}], httpRequests)
+        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         result = loads(body, parse_float=Decimal)
         result = result['result']
         self.assertEquals('/search?query=fiets', result['request'])
-        self.assertEquals('/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%3A200%2Cdc%3Asubject%3A20', result['sruRequest'])
+        self.assertEquals('/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', result['sruRequest'])
         self.assertEquals(1, result['total'])
         self.assertEquals(result['total'], len(result['items']))
         self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['@id'])
@@ -46,9 +46,41 @@ class SearchJsonResponseTest(SeecrTestCase):
                 {'count': 1, 'value': 'Zuivelfabriek Venray'},
                 {'count': 1, 'value': 'Zuivelindustrie, melkfabriek'}
             ], facets['dc:subject'])
+        self.assertEqual('/search?startRecord=11&query=fiets', result['nextPage'])
 
     def testFacetsWithHref(self):
-        self.fail()
+        mockSruResponse = ONE_HIT_SRU_RESPONSE
+        for (toReplace, replaceWith) in [
+                    ('<srw:numberOfRecords>1<', '<srw:numberOfRecords>3<'),
+                    ('<dd:item count="1">Zuivelfabriek Venray<', '<dd:item count="2">Zuivelfabriek Venray<')
+                ]:
+            mockSruResponse = mockSruResponse.replace(toReplace, replaceWith)
+
+        searchJsonResponse = SearchJsonResponse(sruPort=3333, sruPath='/sru')
+        httpRequests = []
+        def mockHttprequest(**kwargs):
+            httpRequests.append(kwargs)
+            response = 'HTTP/1.0 200 OK' + 2 * CRLF + mockSruResponse
+            raise StopIteration(response)
+            yield
+
+        observer = CallTrace('observer', methods=dict(httprequest=mockHttprequest))
+        top = be(
+            (Observable(),
+                (searchJsonResponse,
+                    (observer,)
+                )
+            )
+        )
+        result = asString(top.all.handleRequest(arguments={'query': ['fiets'], 'facets': 'dc:subject,edm:dataProvider'}))
+        header, body = result.split(CRLF * 2)
+        result = loads(body, parse_float=Decimal)
+        facets = result['result']['facets']
+        self.assertEquals([{'count': 1, 'href': '/search?query=fiets+AND+edm%3AdataProvider+exact+%22RooyNet+%28limburgserfgoed.nl%29%22&facets=dc%3Asubject%2Cedm%3AdataProvider', 'value': 'RooyNet (limburgserfgoed.nl)'}], facets['edm:dataProvider'])
+        self.assertEquals([
+                {'count': 2, 'href': '/search?query=fiets+AND+dc%3Asubject+exact+%22Zuivelfabriek+Venray%22&facets=dc%3Asubject%2Cedm%3AdataProvider', 'value': 'Zuivelfabriek Venray'},
+                {'count': 1, 'href': '/search?query=fiets+AND+dc%3Asubject+exact+%22Zuivelindustrie%2C+melkfabriek%22&facets=dc%3Asubject%2Cedm%3AdataProvider', 'value': 'Zuivelindustrie, melkfabriek'},
+            ], facets['dc:subject'])
 
     def testSummaryWithEnrichmentToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT))
@@ -151,7 +183,7 @@ RDF_INPUT = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     </oa:Annotation>
 </rdf:RDF>"""
 
-SRU_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
+ONE_HIT_SRU_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?>
 <srw:searchRetrieveResponse xmlns:srw="http://www.loc.gov/zing/srw/" xmlns:diag="http://www.loc.gov/zing/srw/diagnostic/" xmlns:xcql="http://www.loc.gov/zing/cql/xcql/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meresco_srw="http://meresco.org/namespace/srw#">
     <srw:version>1.2</srw:version>
     <srw:numberOfRecords>1</srw:numberOfRecords>

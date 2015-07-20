@@ -33,9 +33,13 @@ class SearchJsonResponse(Observable):
 
     def _rewriteArgumentsForSru(self, arguments):
         sruArguments = dict(arguments, version=['1.1'], operation=['searchRetrieve'])
+        facets = []
+        for value in arguments.get('facets', []):
+            facets.extend(f.strip() for f in value.split(','))
+        if not facets:
+            facets = ['edm:dataProvider', 'dc:subject']
         if not 'x-termdrilldown' in arguments:
-            sruArguments['x-term-drilldown'] = ['edm:dataProvider:200,dc:subject:20']
-        # TODO: startRecord, maxRecords
+            sruArguments['x-term-drilldown'] = ','.join(facets)
         return sruArguments
 
     def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
@@ -57,13 +61,16 @@ class SearchJsonResponse(Observable):
                 facetEntry = dict(value=value, count=count)
                 if count != total:
                     newQuery = arguments['query'][0] + ' AND %s exact "%s"' % (name, value)
-                    facetEntry['href'] = '/search?' + urlencode(dict(arguments, query=newQuery), doseq=True) # TODO: what if no query?
+                    facetEntry['href'] = '/search?' + urlencode(dict(arguments, query=newQuery), doseq=True)
                 facetEntries.append(facetEntry)
             facets[name] = facetEntries
         if facets:
             result['facets'] = facets
+        nextRecordPosition = xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:nextRecordPosition/text()')
+        if nextRecordPosition:
+            result['nextPage'] = '/search?' + urlencode(dict(arguments, startRecord=nextRecordPosition), doseq=True)
         d = dict(result=result)
-        return dumps(d, indent=4, use_decimal=True, item_sort_key=lambda item: (indexOf(item[0], ['request', 'total', 'items', 'facets', 'sruRequest']), item[0]))
+        return dumps(d, indent=4, use_decimal=True, item_sort_key=lambda item: (indexOf(item[0], ['request', 'total', 'items', 'nextPage', 'facets', 'sruRequest']), item[0]))
 
 
 def summaryWithEnrichmentToJsonLd(rdf):

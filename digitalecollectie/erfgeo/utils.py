@@ -41,11 +41,11 @@ def first(l, default=None):
             return v
     return default
 
-def indexOf(e, l):
+def indexOf(e, l, default=-1):
     try:
         return l.index(e)
     except ValueError:
-        return -1
+        return default
 
 
 class Bucket(object):

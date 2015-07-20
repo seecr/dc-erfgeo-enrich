@@ -37,7 +37,7 @@ from meresco.core import Observable
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
 from digitalecollectie.erfgeo.geometry import Point, MultiLineString, MultiPolygon
 from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
-from digitalecollectie.erfgeo.utils import first
+from digitalecollectie.erfgeo.utils import first, indexOf
 
 
 class ErfGeoEnrichmentFromSummary(Observable):
@@ -73,7 +73,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
         pits = sorted(
             pits,
             key=lambda pit: (
-                SHAPE_PRECEDENCE.get(type(pit.get('geometry')), 0),
+                indexOf(type(pit.get('geometry')), SHAPE_PRECEDENCE),
                 pit.get('hasEnd', '2030-00-00'),
                 pit.get('hasBegin', '0000-00-00'),
             ),
@@ -124,7 +124,7 @@ LOCATION_PROPERTIES = [
     dict(dutchLabel='straat', expectedType='hg:Street'),
     dict(dutchLabel='dorp', expectedType='hg:Place'),
     dict(dutchLabel='gemeente', expectedType='hg:Municipality'),
-    # Note: 'postcode:' is also used, but currently not useful for matching
+    # Note: 'postcode:' also occurs, but currently not useful for matching
 ]
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
@@ -138,4 +138,4 @@ TYPE_MARKERS = {
     '?': None
 }
 
-SHAPE_PRECEDENCE = {MultiPolygon: 3, MultiLineString: 2, Point: 1}
+SHAPE_PRECEDENCE = [Point, MultiLineString, MultiPolygon]
