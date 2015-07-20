@@ -36,7 +36,7 @@ from distutils.core import setup
 
 data_files = []
 for path, dirs, files in walk('doc'):
-    data_files.append((path.replace('doc', '/usr/share/doc/natag', 1), [join(path, f) for f in files if f != 'license.conf']))
+    data_files.append((path.replace('doc', '/usr/share/doc/dc-erfgeo-enrich', 1), [join(path, f) for f in files if f != 'license.conf']))
 for path, dirs, files in walk('sbin'):
     data_files.append((path.replace('sbin', '/sbin', 1), [join(path, f) for f in files]))
 
