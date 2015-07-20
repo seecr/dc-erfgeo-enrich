@@ -56,6 +56,7 @@ setup(
     packages = [
         'digitalecollectie',
         'digitalecollectie.erfgeo',
+        'digitalecollectie.erfgeo.index',
     ],
     scripts = binScripts,
     package_data = {
