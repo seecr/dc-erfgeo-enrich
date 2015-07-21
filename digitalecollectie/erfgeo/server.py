@@ -105,6 +105,7 @@ additionalGlobals = {
     'lxmltostring': lxmltostring,
     'redirectHttp': redirectHttp,
     'staticFileExists': staticFileExists,
+    'UNTOKENIZED_PREFIX': UNTOKENIZED_PREFIX,
 }
 
 ERFGEO_ANNOTATION_METADATA_FORMAT = ('erfGeoEnrichment', '', namespaces.rdf)
@@ -278,7 +279,8 @@ def dna(reactor, config, statePath, out=stdout):
                         (PathFilter('/', excluding=['/about', '/static', '/info', '/oai', '/sru', '/search']),
                             (DynamicHtml([dynamicHtmlFilePath], reactor=reactor, indexPage='/index', additionalGlobals=additionalGlobals),
                                 (SummaryForRecordId(digitaleCollectieHost=digitaleCollectieHost, digitaleCollectiePort=digitaleCollectiePort),),
-                                (erfGeoEnrichmentFromSummary,)
+                                (erfGeoEnrichmentFromSummary,),
+                                (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),),
                             ),
                         )
                     )

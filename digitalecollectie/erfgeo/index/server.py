@@ -118,7 +118,6 @@ def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePa
                             (XmlXPath(['/oai:record/oai:metadata/rdf:RDF'], namespaces=namespaces, fromKwarg='lxmlNode'),
                                 (LxmlToFieldsList(),
                                     (FieldsListToLuceneDocument(fieldRegistry, IndexFields),
-                                        # TODO: index geo coordinates from WKT
                                         (lucene,),
                                         (termNumerator,),
                                     )

@@ -49,7 +49,7 @@ def main(arguments, Body, **kwargs):
             </ul>
             <h3>Zoeken</h3>
             <ul>
-                <li><a href="/api">Documentatie</a></li>
+                <li><a href="/api">API description</a></li>
                 <li><a href="/search?query=*">/search API (JSON response)</a>
                     <br/>
                     Probeer (CQL):
