@@ -41,7 +41,7 @@ def main(arguments=None, **kwargs):
         <form action="/query" method="POST">
             <dl>
                 <dt>Query</dt>
-                <dd><input type="text" name="query" size="60"></dd>
+                <dd><input type="text" name="query" size="100"></dd>
             </dl>
             <button id="submit" type="submit">Bevraag Digitale Collectie ErfGeo Enrichment API</button>
         </form>

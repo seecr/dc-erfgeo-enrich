@@ -83,7 +83,9 @@ class ErfGeoEnrichmentFromSummary(Observable):
     def _queryFromCoverageValues(self, coverageValues):
         locationValues, expectedType = self._recognizeLocationKeyValues(coverageValues)
         locationValues, expectedType = self._recognizedParenthesizedParts(locationValues, expectedType)
-        return ', '.join(locationValues), expectedType
+        query = ', '.join(locationValues)
+        query = self._sanitizeQuery(query)
+        return query, expectedType
 
     def _recognizeLocationKeyValues(self, locationValues):
         expectedType = None
@@ -117,6 +119,9 @@ class ErfGeoEnrichmentFromSummary(Observable):
                     scope = None
                 locationValues[i] = ', '.join(v for v in [head, scope, tail] if v)
         return locationValues, expectedType
+
+    def _sanitizeQuery(self, query):
+        return query.replace('(', ' ').replace(')', ' ')
 
 
 LOCATION_PROPERTIES = [

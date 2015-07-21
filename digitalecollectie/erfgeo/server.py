@@ -148,7 +148,6 @@ def createUploadHelix(oaiJazz, storage, erfGeoEnrichmentFromSummary):
                             (SummaryToErfGeoEnrichment(),
                                 (erfGeoEnrichmentFromSummary,),
                                 (XmlPrintLxml(fromKwarg='lxmlNode', toKwarg='data'),
-                                    (LogComponent('enrichment'),),
                                     (AddDeleteToMultiSequential(),
                                         (storage,),
                                     )
@@ -158,7 +157,6 @@ def createUploadHelix(oaiJazz, storage, erfGeoEnrichmentFromSummary):
                                             ERFGEO_ANNOTATION_METADATA_FORMAT, COMBINED_ANNOTATION_METADATA_FORMAT
                                         ]),
                                     (AdoptOaiSetSpecs(),
-                                        (LogComponent('to oaiJazz'),),
                                         (oaiJazz,)
                                     )
                                 ),
@@ -242,7 +240,6 @@ def dna(reactor, config, statePath, out=stdout):
                                     supportXWait=True),
                                 (SeecrOaiWatermark(),),
                                 (oaiJazz,),
-                                (LogComponent('to storage'),),
                                 (MaybeCombineWithSummary(),
                                     (erfGeoEnrichmentStorage,),
                                 )
@@ -258,7 +255,6 @@ def dna(reactor, config, statePath, out=stdout):
                                             (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
                                         ),
                                     ),
-                                    (LogComponent('/sru to storage'),),
                                     (MaybeCombineWithSummary(),
                                         (erfGeoEnrichmentStorage,),
                                     ),
