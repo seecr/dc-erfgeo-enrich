@@ -40,21 +40,35 @@ def main(arguments, Body, **kwargs):
     yield """
         <h2>API</h2>
         <ul>
-            <h3>OAI-PMH interface</h2>
+            <h3>OAI-PMH interface</h3>
             <p><a href="http://www.openarchives.org/OAI/openarchivesprotocol.html">OAI-PMH specification</a></p>
             <ul>
                 <li><a href="/oai?verb=ListRecords&metadataPrefix=erfGeoEnrichment">ListRecords for metadataPrefix 'erfGeoEnrichment'</a></li>
+                <li><a href="/oai?verb=ListRecords&metadataPrefix=erfGeoEnrichment%2Bsummary">ListRecords for metadataPrefix 'erfGeoEnrichment+summary'</a></li>
                 <li><a href="/oai?verb=ListSets">available sets</a></li>
             </ul>
-            <h3>Zoeken</h2>
+            <h3>Zoeken</h3>
             <ul>
-                <li>Not supported yet</li>
+                <li><a href="/api">Documentatie</a></li>
+                <li><a href="/search?query=*">/search API (JSON response)</a>
+                    <br/>
+                    Probeer (CQL):
+                    <form action="/search" method="GET">
+                        <input type="text" name="query" size="100">
+                        <button id="submit" type="submit">Zoek</button>
+                    </form>
+                </li>
+                <li><a href="/sru">/sru API</a></li>
             </ul>
         </ul>
-        <h2>Proberen</h2>
-        <ul>
-            <li><a href="/form">Zoeken op query string of Digitale Collectie recordId</a></li>
-        </ul>
+        <h2>Source code</h2>
+        <p><a href="https://github.com/seecr/dc-erfgeo-enrich">GitHub</a></p>
+        <!--
+            <h2>Probeer ErfGeo API</h2>
+            <ul>
+                <li><a href="/tryout_erfgeo_API">Zoeken met ErfGeo API</a></li>
+            </ul>
+        -->
     """
 
     yield page.footer()

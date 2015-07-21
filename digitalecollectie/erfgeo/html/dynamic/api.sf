@@ -1,0 +1,58 @@
+import page
+
+
+def main(**kwargs):
+    yield page.header()
+
+    yield '''<h1>API description</h1>
+
+<p>The API to the Digitale Collectie ErfGeo Enrich service consists of an OAI-PMH endpoint as well as a /search endpoint. (An SRU enpoint exists a /sru, but this is not described currently.)</p>
+
+<h2><a href="#search"></a>Search</h2>
+
+<p>The <code>/search</code> interface takes a least a <code>query</code> parameter that follows the <a href="http://www.loc.gov/standards/sru/cql/">Contextual Query Language (CQL)</a>. It returns a JSON response containing search result items that are described in JSON-LD.</p>
+
+<p>A simple query takes the form <code><a href="http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt</a></code></p>
+
+<h4>Fields</h4>
+
+<p>Queries can refer to specific fields, e.g.: <a href="http://erfgeo.data.digitalecollectie.nl/search?query=dc:title%3Dnachtwacht+AND+dc:creator%3Drembrandt"><code>dc:title=nachtwacht AND dc:creator=rembrandt</code></a></p>
+<p>A bounding box can be specified as part of the query by specifying ranges for the fields <code>dcterms:spatial.geo:lat</code> and <code>dcterms:spatial.geo:long</code>. E.g.: <code><a href="http://erfgeo.data.digitalecollectie.nl/search?query=dcterms:spatial.geo:lat%3E50.2%20AND%20dcterms:spatial.geo:long%3E3.6%20AND%20dcterms:spatial.geo:lat%3C53.1%20AND%20dcterms:spatial%3C5.8">dcterms:spatial.geo:lat>50.2 AND dcterms:spatial.geo:long>3.6 AND dcterms:spatial.geo:lat<53.1 AND dcterms:spatial<5.8</a></code></p>
+
+
+<!--
+<p>Currently the following fields are distinguished in the search index:</p>
+
+<ul>'''
+    # for field in (yield observable.any.fieldnames(core='summary')).hits:
+    #     if not field in ['__all__', '$facets']:
+    #         yield '<li>%s</li>\n' % escapeHtml(field)
+    yield '''
+</ul>
+-->
+
+<h4>Facets</h4>
+
+<p>Facets can be requested with the <code>facets</code> parameter, with separate facet fields separated by a , character (<code>%2C</code> url encoded).
+More than the default number of 10 facets can be requested by adding a colon and a number to specified facet fields.
+E.g. <code>http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider%3A40</code></p>
+
+<!--
+<p>Currently, the following fields are available as facets:</p>
+
+<ul>'''
+    # for field in (yield observable.any.drilldownFieldnames(core='summary')).hits:
+    #     yield '<li>%s</li>\n' % escapeHtml(field.replace(UNTOKENIZED_PREFIX, ''))
+    yield '''
+</ul>
+-->
+
+<h2><a name="oai-pmh"></a>OAI-PMH</h2>
+
+<p>The OAI-PMH interface(s) implements the <a href="http://www.openarchives.org/OAI/openarchivesprotocol.html">Open Archives Initiative Protocol for Metadata Harvesting</a>.</p>
+
+<ul>
+<li><a href="http://erfgeo.data.digitalecollectie.nl/oai?verb=Identify">baseurl for all records in the Digitale Collectie ErfGeo Enrich API</a></li>
+</ul>'''
+
+    yield page.footer()

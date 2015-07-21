@@ -121,7 +121,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
         return locationValues, expectedType
 
     def _sanitizeQuery(self, query):
-        return query.replace('(', ' ').replace(')', ' ')
+        return FORBIDDEN_IN_QUERY.sub(' ', query)
 
 
 LOCATION_PROPERTIES = [
@@ -132,6 +132,8 @@ LOCATION_PROPERTIES = [
 ]
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
+
+FORBIDDEN_IN_QUERY = re.compile(r"[^0-9a-zA-Z,\s]+")
 
 TYPE_MARKERS = {
     'stad': 'hg:Place',

@@ -44,6 +44,7 @@ def main(Body=None, **kwargs):
         redirectUrl = '/search?' + urlencode(dict(query=query))
         yield redirectHttp % redirectUrl
         return
+
     elif erfGeoQuery:
         annotation = yield observable.any.annotationFromQuery(erfGeoQuery)
     elif recordId:

@@ -36,21 +36,10 @@ import page
 def main(arguments=None, **kwargs):
     yield page.header(**kwargs)
 
-    yield '''<h2>Probeer ErfGeo Enrichment /search API</h2>'''
-    yield '''<div>
-        <form action="/query" method="POST">
-            <dl>
-                <dt>Query</dt>
-                <dd><input type="text" name="query" size="100"></dd>
-            </dl>
-            <button id="submit" type="submit">Bevraag Digitale Collectie ErfGeo Enrichment API</button>
-        </form>
-    </div>'''
-
     yield '''<h2>Probeer ErfGeo Historische Geocoder</h2>'''
 
     yield '''<div>
-        <form action="/query" method="POST">
+        <form action="/processqueryform" method="POST">
             <dl>
                 <dt>Zoektermen</dt>
                 <dd><input type="text" name="erfGeoQuery" size="60"></dd>
@@ -60,10 +49,10 @@ def main(arguments=None, **kwargs):
     </div>'''
 
     yield '''<div>
-        <form action="/query" method="POST">
+        <form action="/processqueryform" method="POST">
             <dl>
                 <dt>record id</dt>
-                <dd><input type="text" name="recordId" size="60"></dd>
+                <dd><input type="text" name="recordId" size="100"></dd>
             </dl>
             <button id="submit" type="submit">Bevraag ErfGeo API</button>
         </form>

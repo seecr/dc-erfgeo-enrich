@@ -36,7 +36,7 @@ from simplejson import dumps
 from lxml.etree import XML, Element
 
 from meresco.core import Observable
-from meresco.components.http.utils import CRLF
+from meresco.components.http.utils import CRLF, redirectHttp
 
 from digitalecollectie.erfgeo.namespaces import namespaces, xpath, xpathFirst, tagToCurie, uriToCurie
 from digitalecollectie.erfgeo.utils import indexOf
@@ -52,6 +52,9 @@ class SearchJsonResponse(Observable):
         sruRequest = self._sruPath
         headers = kwargs.get('Headers', {})
         arguments = kwargs.get('arguments')
+        if not 'query' in arguments:
+            yield redirectHttp % '/api'
+            return
         sruArguments = self._rewriteArgumentsForSru(arguments)
         if sruArguments:
             sruRequest = sruRequest + '?' + urlencode(sruArguments, doseq=True)

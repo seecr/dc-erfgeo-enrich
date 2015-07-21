@@ -87,10 +87,10 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         self.assertEquals('Utrecht', query)
         self.assertEquals(None, expectedType)
 
-    def testQueryFromSummaryWithUnclosedOpeningParenthesisSanitized(self):
+    def testQueryFromSummarySanitized(self):
         egefs = ErfGeoEnrichmentFromSummary()
-        query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Abc (def']))
-        self.assertEquals('Abc  def', query)
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Abc (def "ghi']))
+        self.assertEquals('Abc  def  ghi', query)
         self.assertEquals(None, expectedType)
 
     def testSelectPit(self):
