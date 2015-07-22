@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -30,31 +29,27 @@
 #
 ## end license ##
 
-from os import system
-from sys import path
-from unittest import main
 
-system('find .. -name "*.pyc" | xargs rm -f')
-from glob import glob
-for dir in glob('../deps.d/*'):
-    path.insert(0, dir)
-path.insert(0, "..")
+from seecr.test import SeecrTestCase
 
-from adoptoaisetspecstest import AdoptOaiSetSpecsTest
-from callstackdicttest import CallStackDictTest
-from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
-from oaisetsharvestertest import OaiSetsHarvesterTest
-from pittoannotationtest import PitToAnnotationTest
-from rewriteboundingboxfieldstest import RewriteBoundingBoxFieldsTest
-from searchjsonresponsetest import SearchJsonResponseTest
-from setsselectiontest import SetsSelectionTest
-from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
-from unprefixidentifiertest import UnprefixIdentifierTest
-from geometrytest import GeometryTest
+from cqlparser import cql2string, parseString
+from meresco.components import CqlMultiSearchClauseConversion
 
-from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
-from index.lxmltofieldslisttest import LxmlToFieldsListTest
+from digitalecollectie.erfgeo.rewriteboundingboxfields import RewriteBoundingBoxFields
 
 
-if __name__ == '__main__':
-    main()
+class RewriteBoundingBoxFieldsTest(SeecrTestCase):
+    def testNothingToBeDone(self):
+        self.assertEquals('field=value', self.convert('field=value'))
+
+    def testRewrite(self):
+        self.assertEquals('dcterms:spatial.geo:lat > 1.23', self.convert('minGeoLat=1.23'))
+        self.assertEquals('dcterms:spatial.geo:lat < 7.23', self.convert('maxGeoLat = 7.23'))
+        self.assertEquals('dcterms:spatial.geo:long > 50.23', self.convert('minGeoLong=50.23'))
+        self.assertEquals('dcterms:spatial.geo:long < 52.23', self.convert('maxGeoLong = 52.23'))
+
+    def convert(self, cqlString):
+        converter = CqlMultiSearchClauseConversion([
+                RewriteBoundingBoxFields().filterAndModifier()
+            ], fromKwarg="cqlAbstractSyntaxTree")
+        return cql2string(converter._convert(parseString(cqlString)))

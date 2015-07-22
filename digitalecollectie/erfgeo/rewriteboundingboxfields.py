@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -30,31 +29,27 @@
 #
 ## end license ##
 
-from os import system
-from sys import path
-from unittest import main
 
-system('find .. -name "*.pyc" | xargs rm -f')
-from glob import glob
-for dir in glob('../deps.d/*'):
-    path.insert(0, dir)
-path.insert(0, "..")
+class RewriteBoundingBoxFields(object):
+    def canModify(self, node):
+        #SEARCH_CLAUSE(INDEX(...), RELATION(COMPARITOR('=')), SEARCH_TERM(..))
+        return len(node.children) == 3 and \
+                node.children[0].children[0].children[0] in fieldOperatorMapping and \
+                node.children[1].children[0].children[0] == '='
 
-from adoptoaisetspecstest import AdoptOaiSetSpecsTest
-from callstackdicttest import CallStackDictTest
-from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
-from oaisetsharvestertest import OaiSetsHarvesterTest
-from pittoannotationtest import PitToAnnotationTest
-from rewriteboundingboxfieldstest import RewriteBoundingBoxFieldsTest
-from searchjsonresponsetest import SearchJsonResponseTest
-from setsselectiontest import SetsSelectionTest
-from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
-from unprefixidentifiertest import UnprefixIdentifierTest
-from geometrytest import GeometryTest
+    def modify(self, node):
+        realName, operator = fieldOperatorMapping[node.children[0].children[0].children[0]]
+        node.children[0].children[0].children = (realName,)
+        node.children[1].children[0].children = (operator,)
+        return node
 
-from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
-from index.lxmltofieldslisttest import LxmlToFieldsListTest
+    def filterAndModifier(self):
+        return self.canModify, self.modify
 
 
-if __name__ == '__main__':
-    main()
+fieldOperatorMapping = {
+    'maxGeoLat': ('dcterms:spatial.geo:lat', '<'),
+    'minGeoLat': ('dcterms:spatial.geo:lat', '>'),
+    'maxGeoLong': ('dcterms:spatial.geo:long', '<'),
+    'minGeoLong': ('dcterms:spatial.geo:long', '>'),
+}

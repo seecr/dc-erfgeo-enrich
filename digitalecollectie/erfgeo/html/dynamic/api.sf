@@ -12,14 +12,14 @@ def main(**kwargs):
 
 <p>The <code>/search</code> interface takes a least a <code>query</code> parameter that follows the <a href="http://www.loc.gov/standards/sru/cql/">Contextual Query Language (CQL)</a>. It returns a JSON response containing search result items that are described in JSON-LD.</p>
 
-<p>A simple query takes the form <code><a href="http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt</a></code></p>
+<p>A simple query takes the form <code><a href="/search?query=nachtwacht+AND+rembrandt">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt</a></code></p>
 
 <h4>Fields</h4>
 
-<p>Queries can refer to specific fields, e.g.: <a href="http://erfgeo.data.digitalecollectie.nl/search?query=dc:title%3Dnachtwacht+AND+dc:creator%3Drembrandt"><code>dc:title=nachtwacht AND dc:creator=rembrandt</code></a></p>
-<p>A bounding box can be specified as part of the query by specifying ranges for the fields <code>dcterms:spatial.geo:lat</code> and <code>dcterms:spatial.geo:long</code>. E.g.: <code><a href="http://erfgeo.data.digitalecollectie.nl/search?query=dcterms:spatial.geo:lat%3E50.2%20AND%20dcterms:spatial.geo:long%3E3.6%20AND%20dcterms:spatial.geo:lat%3C53.1%20AND%20dcterms:spatial.geo:long%3C7.1">dcterms:spatial.geo:lat>50.2 AND dcterms:spatial.geo:long>3.6 AND dcterms:spatial.geo:lat<53.1 AND dcterms:spatial.geo:long<7.1</a></code></p>
+<p>Queries can refer to specific fields, e.g.: <a href="/search?query=dc:title%3Dnachtwacht+AND+dc:creator%3Drembrandt"><code>dc:title=nachtwacht AND dc:creator=rembrandt</code></a></p>
+<p>A bounding box can be specified as part of the query by specifying ranges for the fields <code>dcterms:spatial.geo:lat</code> and <code>dcterms:spatial.geo:long</code>. E.g.: <code><a href="/search?query=dcterms:spatial.geo:lat%3E50.2%20AND%20dcterms:spatial.geo:long%3E3.6%20AND%20dcterms:spatial.geo:lat%3C53.1%20AND%20dcterms:spatial.geo:long%3C7.1">dcterms:spatial.geo:lat>50.2 AND dcterms:spatial.geo:long>3.6 AND dcterms:spatial.geo:lat<53.1 AND dcterms:spatial.geo:long<7.1</a></code>.</p><p>However, for convenience (and url readability) the bounding box can also be specified by using the (virtual) fields <code>minGeoLat</code>, <code>minGeoLong</code>, <code>maxGeoLat</code> and <code>maxGeoLong</code>. E.g.: <code><a href="/search?query=minGeoLat=50.2%20AND%20minGeoLong=3.6%20AND%20maxGeoLat=53.1%20AND%20maxGeoLong=7.1">minGeoLat=50.2 AND minGeoLong=3.6 AND maxGeoLat=53.1 AND maxGeoLong=7.1</a></code>.</p>
 
-
+<p>&nbsp;</p>
 <p>Currently the following fields are distinguished in the search index:</p>
 
 <ul>'''
@@ -48,7 +48,7 @@ E.g. <code>http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+r
 <p>The OAI-PMH interface(s) implements the <a href="http://www.openarchives.org/OAI/openarchivesprotocol.html">Open Archives Initiative Protocol for Metadata Harvesting</a>.</p>
 
 <ul>
-<li><a href="http://erfgeo.data.digitalecollectie.nl/oai?verb=Identify">baseurl for all records in the Digitale Collectie ErfGeo Enrich API</a></li>
+<li><a href="/oai?verb=Identify">baseurl for all records in the Digitale Collectie ErfGeo Enrich API</a></li>
 </ul>'''
 
     yield page.footer()

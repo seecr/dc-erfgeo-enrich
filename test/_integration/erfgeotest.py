@@ -40,6 +40,7 @@ from meresco.components import lxmltostring
 from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
 from simplejson import loads
 from decimal import Decimal
+from urllib import urlencode
 
 
 class ErfGeoTest(IntegrationTestCase):
@@ -125,6 +126,17 @@ class ErfGeoTest(IntegrationTestCase):
         spatial = d['result']['items'][0]['dcterms:spatial'][0]
         self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
         self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
+
+    def testSearchApiBoundingBox(self):
+        def searchResultIds(q):
+            body = self.getPage('/search?' + urlencode(dict(query=q)))
+            d = loads(body, parse_float=Decimal)
+            return set([item['@id'] for item in d['result']['items']])
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146']), searchResultIds(q='maxGeoLong=5'))
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459', 'limburgs_erfgoed:oai:le:RooyNet:37']), searchResultIds(q='minGeoLong=4'))
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459']), searchResultIds('minGeoLat=4 AND maxGeoLong=6 AND minGeoLat=52 AND maxGeoLat=53'))
+        self.assertEquals(set([]), searchResultIds('minGeoLong=4 AND maxGeoLong=6 AND minGeoLat=53 AND maxGeoLat=54'))
+        self.assertEquals(set(['limburgs_erfgoed:oai:le:RooyNet:37']), searchResultIds('minGeoLong=5.97 AND maxGeoLong=5.98 AND minGeoLat=51.51 AND maxGeoLat=51.52')) # Leunseweg, Leunen, Venray
 
     def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'

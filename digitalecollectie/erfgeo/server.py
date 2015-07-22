@@ -38,12 +38,13 @@ from weightless.core import be, consume
 from weightless.http import HttpRequest
 from weightless.io import Reactor
 
-from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
-from meresco.components.sru import SruParser, SruHandler
-from meresco.components.http.utils import redirectHttp
 from meresco.core import Observable, Transparent
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
 from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact, XmlXPath, RewritePartname
+from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
+from meresco.components.sru import SruParser, SruHandler
+from meresco.components.http.utils import redirectHttp
+
 from meresco.components.http import ObservableHttpServer, PathFilter, FileServer, PathRename, ApacheLogger, StringServer, Deproxy
 from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.log import LogComponent
@@ -64,6 +65,7 @@ from digitalecollectie.erfgeo.maybecombinewithsummary import COMBINED_METADATA_P
 from digitalecollectie.erfgeo.namespaces import xpath, namespaces
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
 from digitalecollectie.erfgeo.pittoannotation import PitToAnnotation
+from digitalecollectie.erfgeo.rewriteboundingboxfields import RewriteBoundingBoxFields
 from digitalecollectie.erfgeo.setsselection import SetsSelection
 from digitalecollectie.erfgeo.searchjsonresponse import SearchJsonResponse
 from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
@@ -92,6 +94,7 @@ cqlClauseConverters = [
         untokenizedFields=untokenizedFieldnames,
         untokenizedPrefix=UNTOKENIZED_PREFIX,
     ).filterAndModifier(),
+    RewriteBoundingBoxFields().filterAndModifier(),
 ]
 
 
