@@ -124,24 +124,29 @@ class ErfGeoEnrichmentFromSummary(Observable):
         return FORBIDDEN_IN_QUERY.sub(' ', query)
 
 
-LOCATION_PROPERTIES = [
-    dict(dutchLabel='straat', expectedType='hg:Street'),
-    dict(dutchLabel='dorp', expectedType='hg:Place'),
-    dict(dutchLabel='gemeente', expectedType='hg:Municipality'),
-    # Note: 'postcode:' also occurs, but currently not useful for matching
-]
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
 
-FORBIDDEN_IN_QUERY = re.compile(r"[^0-9a-zA-Z,\s]+")
+FORBIDDEN_IN_QUERY = re.compile(r"[^0-9a-zA-Z,'\-\s]+")
 
-TYPE_MARKERS = {
-    'stad': 'hg:Place',
-    'plaats': 'hg:Place',
-    'provincie': 'hg:Province',
-    'waterschap': None,
+LOCATION_PROPERTIES = [
+    dict(dutchLabel='straat', expectedType='hg:Street'),
+    dict(dutchLabel='dorp', expectedType='hg:Place'),
+    dict(dutchLabel='stad', expectedType='hg:Place'),
+    dict(dutchLabel='plaats', expectedType='hg:Place'),
+    dict(dutchLabel='water', expectedType='hg:Water'),
+    dict(dutchLabel='gemeente', expectedType='hg:Municipality'),
+    dict(dutchLabel='regio', expectedType='hg:Region'),
+    dict(dutchLabel='provincie', expectedType='hg:Province'),
+    dict(dutchLabel='land', expectedType='hg:Country'),
+    # Note: 'postcode:' also occurs, but currently not useful for matching
+]
+
+TYPE_MARKERS = dict((d['dutchLabel'], d['expectedType']) for d in LOCATION_PROPERTIES)
+TYPE_MARKERS.update({
+    '?': None,
     'eiland': None,
-    '?': None
-}
+    'waterschap': None,
+})
 
 SHAPE_PRECEDENCE = [Point, MultiLineString, MultiPolygon]

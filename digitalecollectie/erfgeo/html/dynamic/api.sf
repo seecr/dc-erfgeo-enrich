@@ -6,7 +6,7 @@ def main(**kwargs):
 
     yield '''<h1>API description</h1>
 
-<p>The API to the Digitale Collectie ErfGeo Enrich service consists of an OAI-PMH endpoint as well as a /search endpoint. (An SRU enpoint exists a /sru, but this is not described currently.)</p>
+<p>The API to the Digitale Collectie ErfGeo Enrich service consists of an OAI-PMH endpoint as well as a <code>/search</code> endpoint.</p><p>(In addition to these an SRU endpoint exists at <code>/sru</code>, but that is currently not specified other than by example by including the specific request as part of the JSON response to a <code>/search</code> request.)</p>
 
 <h2><a href="#search"></a>Search</h2>
 

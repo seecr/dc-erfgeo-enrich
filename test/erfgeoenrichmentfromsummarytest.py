@@ -93,6 +93,12 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         self.assertEquals('Abc  def  ghi', query)
         self.assertEquals(None, expectedType)
 
+    def testApostrophAndDashKeptInQuery(self):
+        egefs = ErfGeoEnrichmentFromSummary()
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(["'s-Gravenhage"]))
+        self.assertEquals("'s-Gravenhage", query)
+        self.assertEquals(None, expectedType)
+
     def testSelectPit(self):
         egefs = ErfGeoEnrichmentFromSummary()
         pit = egefs.selectPit(QUERY_RESULTS, expectedType=None)
