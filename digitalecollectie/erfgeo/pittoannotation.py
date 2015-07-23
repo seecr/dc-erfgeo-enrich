@@ -89,6 +89,7 @@ class PitToAnnotation(Observable):
         yield '<hg:PlaceInTime rdf:about="%s">\n' % xmlEscape(pit['@id'])
         yield '    <rdf:type rdf:resource="%s"/>\n' % xmlEscape(curieToUri(pit['type']))
         yield '    <rdfs:label>%s</rdfs:label>\n' % xmlEscape(pit['name'])
+        yield self._renderPartOf(pit)
         owlSameAs = pit.get('uri')
         if owlSameAs:
             yield '    <owl:sameAs rdf:resource="%s"/>\n' % xmlEscape(owlSameAs)
@@ -106,6 +107,25 @@ class PitToAnnotation(Observable):
         if geometry:
             yield self._renderGeometry(geometry)
         yield '</hg:PlaceInTime>\n'
+
+    def _renderPartOf(self, pit):
+        woonplaatsnaam = getitem(pit.get('data'), 'woonplaatsnaam')
+        if woonplaatsnaam:
+            yield '''\
+    <dcterms:isPartOf>
+        <hg:Place>
+            <rdfs:label>%s</rdfs:label>
+        </hg:Place>
+    </dcterms:isPartOf>\n''' % xmlEscape(woonplaatsnaam)
+
+        gemeentenaam = getitem(pit.get('data'), 'gme_naam')
+        if gemeentenaam:
+            yield '''\
+    <dcterms:isPartOf>
+        <hg:Municipality>
+            <rdfs:label>%s</rdfs:label>
+        </hg:Municipality>
+    </dcterms:isPartOf>\n''' % xmlEscape(gemeentenaam)
 
     def _renderSameHgConcept(self, concept):
         yield '    <hg:sameHgConcept rdf:resource="%s"/>\n' % concept

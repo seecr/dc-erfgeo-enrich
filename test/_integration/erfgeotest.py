@@ -127,6 +127,14 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
         self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
 
+        body = self.getPage('/search?query=Leunseweg')
+        d = loads(body, parse_float=Decimal)
+        self.assertEquals(1, d['result']['total'])
+        spatial = d['result']['items'][0]['dcterms:spatial'][0]
+        self.assertEquals(['Leunseweg'], spatial['rdfs:label'])
+        self.assertEquals('hg:Municipality', spatial['dcterms:isPartOf'][0]['@type'])
+        self.assertEquals(['Venray'], spatial['dcterms:isPartOf'][0]['rdfs:label'])
+
     def testSearchApiBoundingBox(self):
         def searchResultIds(q):
             body = self.getPage('/search?' + urlencode(dict(query=q)))
