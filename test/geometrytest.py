@@ -1,4 +1,7 @@
 ## begin license ##
+
+
+
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
 # geographical enrichments for records in "Digitale Collectie" (http://digitalecollectie.nl)
@@ -29,6 +32,7 @@
 #
 ## end license ##
 
+import re
 from decimal import Decimal
 
 from seecr.test import SeecrTestCase
@@ -55,6 +59,13 @@ class GeometryTest(SeecrTestCase):
     def testParseWktWithNegations(self):
         g = Geometry.parseWkt("POINT(-30.3 -10.2)")
         self.assertEquals(Point(-30.3, -10.2), g)
+
+    def testCoordinateRegex(self):
+        self.assertEquals('{1.67E-7}', re.sub("(%s)" % Geometry._coordinateRegex, r"{\1}" , "1.67E-7"))
+
+    def testParseWktWithScientificNotationCoordinates(self):
+        g = Geometry.parseWkt("POINT(1.6763812E-7 1.6763812E-7)")
+        self.assertEquals(Point(1.6763812E-7, 1.6763812E-7), g)
 
     def testPointAsWkt(self):
         g = Geometry.fromGeoDict({'type': 'Point', 'coordinates': (5.97978875782, 51.5176185067)})
