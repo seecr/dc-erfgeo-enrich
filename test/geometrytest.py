@@ -52,6 +52,10 @@ class GeometryTest(SeecrTestCase):
         g = Geometry.parseWkt("POINT(30 10)")
         self.assertEquals(Point(30, 10), g)
 
+    def testParseWktWithNegations(self):
+        g = Geometry.parseWkt("POINT(-30.3 -10.2)")
+        self.assertEquals(Point(-30.3, -10.2), g)
+
     def testPointAsWkt(self):
         g = Geometry.fromGeoDict({'type': 'Point', 'coordinates': (5.97978875782, 51.5176185067)})
         self.assertEquals('POINT(5.97978875782 51.5176185067)', g.asWkt())

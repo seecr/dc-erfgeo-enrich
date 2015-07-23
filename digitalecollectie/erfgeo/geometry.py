@@ -73,7 +73,7 @@ class Geometry(object):
         expr = cls._wktPointCoordinatesRe.sub(r"[\1, \2]", expr)
         return cls._typeByWktName[wktName.strip()](*eval(expr))
 
-    _wktPointCoordinatesRe = compile(r'(\d+(?:\.\d+)?)\s(\d+(?:\.\d+)?)')
+    _wktPointCoordinatesRe = compile(r'(-?\d+(?:\.\d+)?)\s(-?\d+(?:\.\d+)?)')
 
     _geometryTypes = {}
     _typeByWktName = {}
