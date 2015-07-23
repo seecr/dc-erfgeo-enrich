@@ -50,7 +50,11 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
     def queryFromSummary(self, summary):
         annotationBody = xpathFirst(summary, 'oa:Annotation/oa:hasBody/*')
-        coverageValues = [s.strip() for s in (xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()'))]
+        coverageValues = xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()')
+        for uri in xpath(annotationBody, 'dcterms:spatial/@rdf:resource'):
+            for value in xpath(summary, '*[@rdf:about="%s"]/skos:prefLabel/text()' % uri):
+                coverageValues.append(value)
+        coverageValues = [s.strip() for s in coverageValues]
         return self._queryFromCoverageValues(coverageValues)
 
     def annotationFromQuery(self, query, expectedType=None, targetUri=None):
