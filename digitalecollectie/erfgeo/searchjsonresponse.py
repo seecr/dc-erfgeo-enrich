@@ -62,6 +62,7 @@ class SearchJsonResponse(Observable):
         header, body = response.split(CRLF * 2)
         jsonResponse = self._sruResponseToJson(arguments=arguments, sruResponseLxml=XML(body), sruRequest=sruRequest)
         yield 'HTTP/1.0 200 OK' + CRLF
+        yield 'Access-Control-Allow-Origin: *' + CRLF
         yield 'Content-Type: application/json' + CRLF * 2
         yield jsonResponse
 

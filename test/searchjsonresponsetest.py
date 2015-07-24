@@ -64,6 +64,7 @@ class SearchJsonResponseTest(SeecrTestCase):
         result = asString(top.all.handleRequest(arguments={'query': ['fiets']}))
         self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?query=fiets&operation=searchRetrieve&version=1.1&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
+        self.assertTrue('Access-Control-Allow-Origin: *' in header)
         result = loads(body, parse_float=Decimal)
         result = result['result']
         self.assertEquals('/search?query=fiets', result['request'])
