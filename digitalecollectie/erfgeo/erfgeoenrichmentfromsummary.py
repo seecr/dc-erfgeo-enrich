@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -131,7 +132,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
 
-FORBIDDEN_IN_QUERY = re.compile(r"[^0-9a-zA-Z,'\-\s]+")
+FORBIDDEN_IN_QUERY = re.compile(r"[^0-9\w'\-\s]+", re.UNICODE)
 
 LOCATION_PROPERTIES = [
     dict(dutchLabel='straat', expectedType='hg:Street'),

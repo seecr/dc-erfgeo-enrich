@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -97,6 +98,12 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(["'s-Gravenhage"]))
         self.assertEquals("'s-Gravenhage", query)
+        self.assertEquals(None, expectedType)
+
+    def testTremaKeptInQuery(self):
+        egefs = ErfGeoEnrichmentFromSummary()
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(["Groot-Brittanië"]))
+        self.assertEquals("Groot-Brittanië", query)
         self.assertEquals(None, expectedType)
 
     def testSelectPit(self):
