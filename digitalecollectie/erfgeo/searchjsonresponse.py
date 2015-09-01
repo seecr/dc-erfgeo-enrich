@@ -67,15 +67,17 @@ class SearchJsonResponse(Observable):
         yield jsonResponse
 
     def _rewriteArgumentsForSru(self, arguments):
-        sruArguments = dict(arguments, version=['1.1'], operation=['searchRetrieve'])
+        sruArguments = dict(arguments)
         facets = []
         for value in arguments.get('facets', []):
             facets.extend(f.strip() for f in value.split(','))
-        if not facets:
+        if facets:
+            del sruArguments['facets']
+        else:
             facets = ['edm:dataProvider', 'dc:subject']
         if not 'x-termdrilldown' in arguments:
             sruArguments['x-term-drilldown'] = ','.join(facets)
-        return sruArguments
+        return [('version', ['1.1']), ('operation', 'searchRetrieve')] + sruArguments.items()
 
     def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
         request = '/search?' + urlencode(arguments, doseq=True)

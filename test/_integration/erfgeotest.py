@@ -110,7 +110,7 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459']), 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>52 AND dcterms:spatial.geo:lat<53')
         self.assertSruQuery(set([]), 'dcterms:spatial.geo:long>4 AND dcterms:spatial.geo:long<6 AND dcterms:spatial.geo:lat>53 AND dcterms:spatial.geo:lat<54')
 
-        self.assertSruQuery(set(['limburgs_erfgoed:oai:le:RooyNet:37']), 'dcterms:spatial.geo:long>5.97 AND dcterms:spatial.geo:long<5.98 AND dcterms:spatial.geo:lat>51.51 AND dcterms:spatial.geo:lat<51.52') # Leunseweg, Leunen, Venray
+        self.assertSruQuery(set(['limburgs_erfgoed:oai:le:RooyNet:37']), 'dcterms:spatial.geo:long>5.97 AND dcterms:spatial.geo:long<5.98 AND dcterms:spatial.geo:lat>51.51 AND dcterms:spatial.geo:lat<51.52')  # Leunseweg, Leunen, Venray
 
     def testSruRecordData(self):
         responseLxml = self._doQuery('dc:subject=Zeeoorlog')
@@ -134,6 +134,14 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(['Leunseweg'], spatial['rdfs:label'])
         self.assertEquals('hg:Municipality', spatial['dcterms:isPartOf'][0]['@type'])
         self.assertEquals(['Venray'], spatial['dcterms:isPartOf'][0]['rdfs:label'])
+
+    def testSearchApiQueryWithFacets(self):
+        body = self.getPage('/search?query=Zeeoorlog&facets=dc:subject')
+        d = loads(body, parse_float=Decimal)
+        self.assertEquals(1, d['result']['total'])
+        spatial = d['result']['items'][0]['dcterms:spatial'][0]
+        self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
+        self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
 
     def testSearchApiBoundingBox(self):
         def searchResultIds(q):
