@@ -81,12 +81,22 @@ class SearchJsonResponse(Observable):
 
     def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
         request = '/search?' + urlencode(arguments, doseq=True)
-        total = int(xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:numberOfRecords/text()'))
         result = dict(
             request=request,
-            sruRequest=sruRequest,
-            total=total
+            sruRequest=sruRequest
         )
+        errors = xpath(sruResponseLxml, '/srw:searchRetrieveResponse/srw:diagnostics/diag:diagnostic')
+        if len(errors) > 0:
+            errorDicts = result['errors'] = []
+            for error in errors:
+                errorDicts.append({
+                    'message': xpathFirst(error, 'diag:message/text()'),
+                    'details': xpathFirst(error, 'diag:details/text()')
+                })
+                return self._resultAsJson(result)
+
+        total = int(xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:numberOfRecords/text()'))
+        result['total'] = total
         result['items'] = [summaryWithEnrichmentToJsonLd(rdf) for rdf in xpath(sruResponseLxml, '/srw:searchRetrieveResponse/srw:records/srw:record/srw:recordData/rdf:RDF')]
         facets = {}
         for navigator in xpath(sruResponseLxml, '/srw:searchRetrieveResponse/srw:extraResponseData/drilldown:drilldown/drilldown:term-drilldown/drilldown:navigator'):
@@ -106,6 +116,9 @@ class SearchJsonResponse(Observable):
         nextRecordPosition = xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:nextRecordPosition/text()')
         if nextRecordPosition:
             result['nextPage'] = '/search?' + urlencode(dict(arguments, startRecord=nextRecordPosition), doseq=True)
+        return self._resultAsJson(result)
+
+    def _resultAsJson(self, result):
         d = dict(result=result)
         return dumps(d, indent=4, use_decimal=True, item_sort_key=lambda item: (indexOf(item[0], ['request', 'total', 'items', 'nextPage', 'facets', 'sruRequest']), item[0]))
 

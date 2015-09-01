@@ -143,6 +143,15 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
         self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
 
+    def testSearchApiQueryWithUnsupportedParameter(self):
+        body = self.getPage('/search?query=*&xyz=abc')
+        d = loads(body, parse_float=Decimal)
+        errors = d['result']['errors']
+        self.assertEquals(1, len(errors))
+        self.assertEquals('Unsupported Parameter', errors[0]['message'])
+        self.assertEquals('xyz', errors[0]['details'])
+        self.assertFalse('total' in d['result'], d['result'])
+
     def testSearchApiBoundingBox(self):
         def searchResultIds(q):
             body = self.getPage('/search?' + urlencode(dict(query=q)))
