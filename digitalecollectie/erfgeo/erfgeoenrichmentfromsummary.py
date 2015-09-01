@@ -132,7 +132,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
 
-FORBIDDEN_IN_QUERY = re.compile(r"[^0-9\w'\-\s]+", re.UNICODE)
+FORBIDDEN_IN_QUERY = re.compile(r"[^0-9\w,'\-\s]+", re.UNICODE)
 
 LOCATION_PROPERTIES = [
     dict(dutchLabel='straat', expectedType='hg:Street'),
