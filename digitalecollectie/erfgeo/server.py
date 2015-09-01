@@ -81,6 +81,7 @@ dynamicHtmlFilePath = join(htmlPath, 'dynamic')
 staticHtmlFilePath = join(htmlPath, 'static')
 
 IP_ADDRESS = gethostbyname(gethostname())
+DRILLDOWN_MAXIMUM = 250
 
 drilldownFieldnames = [
     UNTOKENIZED_PREFIX + 'record.subject',
@@ -251,7 +252,7 @@ def dna(reactor, config, statePath, out=stdout):
                         ),
                         (PathFilter("/sru"),
                             (SruParser(defaultRecordSchema='erfGeoEnrichment+summary', defaultRecordPacking='xml'),
-                                (SruHandler(),
+                                (SruHandler(drilldownMaximumMaximumResults=DRILLDOWN_MAXIMUM),
                                     (CqlMultiSearchClauseConversion(
                                           cqlClauseConverters,
                                           fromKwarg='cqlAbstractSyntaxTree'),
