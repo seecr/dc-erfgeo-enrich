@@ -1,3 +1,34 @@
+## begin license ##
+#
+# "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
+# geographical enrichments for records in "Digitale Collectie" (http://digitalecollectie.nl)
+# by querying the ErfGeo search API (https://erfgeo.nl/search).
+# "Digitale Collectie ErfGeo Enrichment" is developed for Stichting DEN (http://www.den.nl)
+# and the Netherlands Institute for Sound and Vision (http://instituut.beeldengeluid.nl/)
+# by Seecr (http://seecr.nl).
+# The project is based on the open source project Meresco (http://meresco.org).
+#
+# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015 Stichting DEN http://www.den.nl
+#
+# This file is part of "Digitale Collectie ErfGeo Enrichment"
+#
+# "Digitale Collectie ErfGeo Enrichment" is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# "Digitale Collectie ErfGeo Enrichment" is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with "Digitale Collectie ErfGeo Enrichment".  If not, see <http://www.gnu.org/licenses/>.
+#
+## end license ##
+
 import page
 
 
@@ -10,12 +41,11 @@ def main(**kwargs):
 
 <h2><a href="#search"></a>Search</h2>
 
-<p>The <code>/search</code> interface takes a least a <code>query</code> parameter that follows the <a href="http://www.loc.gov/standards/sru/cql/">Contextual Query Language (CQL)</a>. It returns a JSON response containing search result items that are described in JSON-LD.</p>
+<p>The <code>/search</code> interface takes at least a <code>query</code> parameter that follows the <a href="http://www.loc.gov/standards/sru/cql/">Contextual Query Language (CQL)</a>. It returns a JSON response containing search result items that are described in JSON-LD.</p>
 
 <p>A simple query takes the form <code><a href="/search?query=nachtwacht+AND+rembrandt">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt</a></code></p>
 
 <h4>Fields</h4>
-
 <p>Queries can refer to specific fields, e.g.: <a href="/search?query=dc:title%3Dnachtwacht+AND+dc:creator%3Drembrandt"><code>dc:title=nachtwacht AND dc:creator=rembrandt</code></a></p>
 <p>A bounding box can be specified as part of the query by specifying ranges for the fields <code>dcterms:spatial.geo:lat</code> and <code>dcterms:spatial.geo:long</code>. E.g.: <code><a href="/search?query=dcterms:spatial.geo:lat%3E50.2%20AND%20dcterms:spatial.geo:long%3E3.6%20AND%20dcterms:spatial.geo:lat%3C53.1%20AND%20dcterms:spatial.geo:long%3C7.1">dcterms:spatial.geo:lat>50.2 AND dcterms:spatial.geo:long>3.6 AND dcterms:spatial.geo:lat<53.1 AND dcterms:spatial.geo:long<7.1</a></code>.</p><p>However, for convenience (and url readability) the bounding box can also be specified by using the (virtual) fields <code>minGeoLat</code>, <code>minGeoLong</code>, <code>maxGeoLat</code> and <code>maxGeoLong</code>. E.g.: <code><a href="/search?query=minGeoLat=50.2%20AND%20minGeoLong=3.6%20AND%20maxGeoLat=53.1%20AND%20maxGeoLong=7.1">minGeoLat=50.2 AND minGeoLong=3.6 AND maxGeoLat=53.1 AND maxGeoLong=7.1</a></code>.</p>
 
@@ -30,7 +60,6 @@ def main(**kwargs):
 </ul>
 
 <h4>Facets</h4>
-
 <p>Facets can be requested with the <code>facets</code> parameter, with separate facet fields separated by a , character (<code>%2C</code> url encoded).
 More than the default number of 10 facets can be requested by adding a colon and a number to specified facet fields.
 E.g. <code>http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider%3A40</code></p>
@@ -42,6 +71,9 @@ E.g. <code>http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+r
         yield '<li>%s</li>\n' % escapeHtml(field.replace(UNTOKENIZED_PREFIX, ''))
     yield '''
 </ul>
+
+<h4>Paging</h4>
+<p>By default a maximum of 10 records is returned. More records can be requested, up to a maximum of 30 per request, by providing a <code>maximumRecords</code> parameter. More search results can be requested by specifying an offset by means of the <code>startRecord</code> parameter. E.g. <code><a href="/search?query=nachtwacht+AND+rembrandt&startRecord=10&maximumRecords=3">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt&startRecord=10&maximumRecords=3</a></code></p>
 
 <h2><a name="oai-pmh"></a>OAI-PMH</h2>
 
