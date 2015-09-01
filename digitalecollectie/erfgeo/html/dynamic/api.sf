@@ -62,7 +62,7 @@ def main(**kwargs):
 <h4>Facets</h4>
 <p>Facets can be requested with the <code>facets</code> parameter, with separate facet fields separated by a , character (<code>%2C</code> url encoded).
 More than the default number of 10 facets can be requested by adding a colon and a number (250 max.) to specified facet fields.
-E.g. <code><a href="/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider%3A40">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider%3A40</a></code></p>
+E.g. <code><a href="/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider:40">http://erfgeo.data.digitalecollectie.nl/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject%2Cedm:dataProvider:40</a></code></p>
 
 <p>Currently, the following fields are available as facets:</p>
 
