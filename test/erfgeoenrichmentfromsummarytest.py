@@ -82,6 +82,16 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         self.assertEquals('Groningen', query)
         self.assertEquals('hg:Province', expectedType)
 
+    def testQueryFromSummaryWithMoreThenOneParenthesizedType(self):
+        egefs = ErfGeoEnrichmentFromSummary()
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (stad)', 'Groningen (provincie)']))
+        self.assertEquals('Groningen, Groningen', query)
+        self.assertEquals('hg:Place', expectedType)
+
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (provincie)', 'Groningen (stad)']))
+        self.assertEquals('Groningen, Groningen', query)
+        self.assertEquals('hg:Place', expectedType)
+
     def testQueryFromSummaryWithParenthesizedQuestionMarkIgnored(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Utrecht (?)']))

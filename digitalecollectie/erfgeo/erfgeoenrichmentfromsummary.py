@@ -119,8 +119,9 @@ class ErfGeoEnrichmentFromSummary(Observable):
                 scope = m.group(2).strip()
                 tail = m.group(3).strip()
                 if scope in TYPE_MARKERS:
-                    if not expectedType:
-                        expectedType = TYPE_MARKERS[scope]
+                    type = TYPE_MARKERS[scope]
+                    if not expectedType or indexOf(expectedType, TYPE_PRECEDENCE) > indexOf(type, TYPE_PRECEDENCE):
+                        expectedType = type
                     scope = None
                 locationValues[i] = ', '.join(v for v in [head, scope, tail] if v)
         return locationValues, expectedType
@@ -154,4 +155,5 @@ TYPE_MARKERS.update({
     'waterschap': None,
 })
 
+TYPE_PRECEDENCE = ['hg:Street', 'hg:Place', 'hg:Water', 'hg:Municipality', 'hg:Region', 'hg:Province', 'hg:Country']
 SHAPE_PRECEDENCE = [Point, MultiLineString, MultiPolygon]
