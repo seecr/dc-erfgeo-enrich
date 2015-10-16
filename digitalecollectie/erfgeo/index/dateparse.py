@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -30,32 +29,47 @@
 #
 ## end license ##
 
-from os import system
-from sys import path
-from unittest import main
-
-system('find .. -name "*.pyc" | xargs rm -f')
-from glob import glob
-for dir in glob('../deps.d/*'):
-    path.insert(0, dir)
-path.insert(0, "..")
-
-from adoptoaisetspecstest import AdoptOaiSetSpecsTest
-from callstackdicttest import CallStackDictTest
-from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
-from oaisetsharvestertest import OaiSetsHarvesterTest
-from pittoannotationtest import PitToAnnotationTest
-from rewriteboundingboxfieldstest import RewriteBoundingBoxFieldsTest
-from searchjsonresponsetest import SearchJsonResponseTest
-from setsselectiontest import SetsSelectionTest
-from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
-from unprefixidentifiertest import UnprefixIdentifierTest
-from geometrytest import GeometryTest
-
-from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
-from index.lxmltofieldslisttest import LxmlToFieldsListTest
-from index.dateparsetest import DateParseTest
+from re import compile
 
 
-if __name__ == '__main__':
-    main()
+def parseYears(value):
+    if not value:
+        return
+    value = value.lower().replace(' ', '')
+    value = value.replace('ca.', '')
+    value = value.replace('cop.', '')
+    for yearRe in YEAR_REGEXES:
+        match = yearRe.match(value)
+        if match:
+            years = _expandYearPattern(match.group('year'))
+            years2 = years
+            if 'year_to' in yearRe.pattern:
+                years2 = _expandYearPattern(match.group('year_to'))
+            return range(min(years), max(years2) + 1)
+    return []
+
+
+def _expandYearPattern(year):
+    numberOfX = year.count('x')
+    if numberOfX:
+        numberOfX = numberOfX + (4 - len(year))
+        year = year.replace('xx', 'x')
+    return [
+        int(year.replace('x', ("{0:0%s}" % numberOfX).format(i)))
+        for i in range(10 ** numberOfX)
+    ]
+
+
+YEAR_X = '\d{2}(\d(\d|x)|xx?)' # 194X, #18XX, #18X
+
+YEAR_REGEXES = [
+    compile(r)
+    for r in [
+        r'^(?P<year>%s)$' % YEAR_X, #2000
+        r'^\[(?P<year>%s)\]$' % YEAR_X, #[2000]
+        r'^(?P<year>%s)-(?P<year_to>%s)$' % (YEAR_X, YEAR_X), #2000-2010
+        r'^(?P<year>%s)-...$' % YEAR_X, #2000-...
+        r'^(?P<year>\d{4})-\d{2}(-\d{2}(t\d{2}:\d{2}(:\d{2})?z?)?)?$', #2000-01-01
+        r'^\d{2}-\d{2}-(?P<year>\d{4})$', #01-01-2000
+    ]
+]

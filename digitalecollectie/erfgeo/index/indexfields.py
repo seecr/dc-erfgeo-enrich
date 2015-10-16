@@ -32,6 +32,7 @@
 from meresco.lucene import DrilldownField, SORTED_PREFIX, UNTOKENIZED_PREFIX
 
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
+from digitalecollectie.erfgeo.index.dateparse import parseYears
 from digitalecollectie.erfgeo.geometry import Geometry
 
 
@@ -97,6 +98,9 @@ class IndexFields(object):
                 yield 'dcterms:spatial.geo:long', geoLong
                 yield 'dcterms:spatial.geo:lat', geoLat
             return
+        if fieldname in ['dc:date', 'dcterms:created']:
+            for year in parseYears(value):
+                yield 'dc:date.year', str(year)
         yield fieldname, value
 
     def _inAll(self, fieldname):

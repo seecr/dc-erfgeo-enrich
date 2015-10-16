@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.6
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -30,32 +29,28 @@
 #
 ## end license ##
 
-from os import system
-from sys import path
-from unittest import main
+from seecr.test import SeecrTestCase
 
-system('find .. -name "*.pyc" | xargs rm -f')
-from glob import glob
-for dir in glob('../deps.d/*'):
-    path.insert(0, dir)
-path.insert(0, "..")
-
-from adoptoaisetspecstest import AdoptOaiSetSpecsTest
-from callstackdicttest import CallStackDictTest
-from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
-from oaisetsharvestertest import OaiSetsHarvesterTest
-from pittoannotationtest import PitToAnnotationTest
-from rewriteboundingboxfieldstest import RewriteBoundingBoxFieldsTest
-from searchjsonresponsetest import SearchJsonResponseTest
-from setsselectiontest import SetsSelectionTest
-from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
-from unprefixidentifiertest import UnprefixIdentifierTest
-from geometrytest import GeometryTest
-
-from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
-from index.lxmltofieldslisttest import LxmlToFieldsListTest
-from index.dateparsetest import DateParseTest
+from digitalecollectie.erfgeo.index.dateparse import parseYears
 
 
-if __name__ == '__main__':
-    main()
+class DateParseTest(SeecrTestCase):
+    def testParseYears(self):
+        self.assertEquals([2000], parseYears("2000-01-01"))
+        self.assertEquals([2000], parseYears("2000-01-01T01:01:01Z"))
+        self.assertEquals([2000], parseYears("2000-01"))
+        self.assertEquals([2000], parseYears("2000"))
+        self.assertEquals([2000, 2001, 2002, 2003, 2004], parseYears("2000 - 2004"))
+        self.assertEquals([2000, 2001, 2002, 2003, 2004], parseYears("2000-2004"))
+        self.assertEquals([2000], parseYears("2000 - ..."))
+        self.assertEquals([2000], parseYears("2000-..."))
+        self.assertEquals([2001], parseYears("[2001]"))
+        self.assertEquals([2000], parseYears("01-01-2000"))
+        self.assertEquals([2000], parseYears("[ca. 2000]"))
+        self.assertEquals([2000, 2001, 2002, 2003, 2004], parseYears("ca. 2000 - ca. 2004"))
+        self.assertEquals([2000], parseYears("cop. 2000"))
+        self.assertEquals([1940, 1941, 1942, 1943, 1944, 1945, 1946, 1947, 1948, 1949], parseYears("194X"))
+        self.assertEquals(range(1940, 1970), parseYears("194X - 196x"))
+        self.assertEquals([], parseYears("20e eeuw"))
+        self.assertEquals(range(1900, 2000), parseYears("19X"))
+

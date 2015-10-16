@@ -153,15 +153,19 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertFalse('total' in d['result'], d['result'])
 
     def testSearchApiBoundingBox(self):
-        def searchResultIds(q):
-            body = self.getPage('/search?' + urlencode(dict(query=q)))
-            d = loads(body, parse_float=Decimal)
-            return set([item['@id'] for item in d['result']['items']])
-        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146']), searchResultIds(q='maxGeoLong=5'))
-        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459', 'limburgs_erfgoed:oai:le:RooyNet:37']), searchResultIds(q='minGeoLong=4'))
-        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459']), searchResultIds('minGeoLat=4 AND maxGeoLong=6 AND minGeoLat=52 AND maxGeoLat=53'))
-        self.assertEquals(set([]), searchResultIds('minGeoLong=4 AND maxGeoLong=6 AND minGeoLat=53 AND maxGeoLat=54'))
-        self.assertEquals(set(['limburgs_erfgoed:oai:le:RooyNet:37']), searchResultIds('minGeoLong=5.97 AND maxGeoLong=5.98 AND minGeoLat=51.51 AND maxGeoLat=51.52')) # Leunseweg, Leunen, Venray
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146']), self._searchResultIds(q='maxGeoLong=5'))
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459', 'limburgs_erfgoed:oai:le:RooyNet:37']), self._searchResultIds(q='minGeoLong=4'))
+        self.assertEquals(set(['geluidVanNl:geluid_van_nederland:47954146', 'NIOD_BBWO2:niod:3366459']), self._searchResultIds('minGeoLat=4 AND maxGeoLong=6 AND minGeoLat=52 AND maxGeoLat=53'))
+        self.assertEquals(set([]), self._searchResultIds('minGeoLong=4 AND maxGeoLong=6 AND minGeoLat=53 AND maxGeoLat=54'))
+        self.assertEquals(set(['limburgs_erfgoed:oai:le:RooyNet:37']), self._searchResultIds('minGeoLong=5.97 AND maxGeoLong=5.98 AND minGeoLat=51.51 AND maxGeoLat=51.52')) # Leunseweg, Leunen, Venray
+
+    def testSearchApiDcDateYearRange(self):
+        self.assertEquals(set(['limburgs_erfgoed:oai:le:RooyNet:37']), self._searchResultIds(q='dc:date.year>1700 AND dc:date.year<1990'))
+
+    def _searchResultIds(self, q):
+        body = self.getPage('/search?' + urlencode(dict(query=q)))
+        d = loads(body, parse_float=Decimal)
+        return set([item['@id'] for item in d['result']['items']])
 
     def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'
@@ -188,3 +192,5 @@ class ErfGeoTest(IntegrationTestCase):
     def getPage(self, path, arguments=None):
         header, body = getRequest(self.erfGeoEnrichmentPort, path, arguments if arguments else {}, parse=False)
         return body
+
+
