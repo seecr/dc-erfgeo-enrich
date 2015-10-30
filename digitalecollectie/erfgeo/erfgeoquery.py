@@ -31,6 +31,7 @@
 #
 ## end license ##
 
+from traceback import print_exc
 from decimal import Decimal
 from time import time
 
@@ -62,26 +63,32 @@ class ErfGeoQuery(Observable):
         queryDict = dict(q=s)
         if not expectedType is None:
             queryDict['type'] = expectedType
-        response = yield httpget(host=self._host, port=self._port, request=self._path + '?' + urlencode(queryDict), ssl=self._ssl)
+        response = yield self.any.httprequest(host=self._host, port=self._port, request=self._path + '?' + urlencode(queryDict), ssl=self._ssl)
         header, body = response.split('\r\n\r\n')
         results = self.parseQueryResponse(body)
         raise StopIteration(results)
 
     def parseQueryResponse(self, body):
-        parsed = loads(body, parse_float=Decimal)
-        base = parsed['@context']['@base']
-        results = []
-        for feature in parsed['features']:
-            geometries = feature['geometry']['geometries']
-            properties = feature['properties']
-            pits = []
-            for pit in properties['pits']:
-                pit['@base'] = base
-                pit['@id'] = base + pit['@id']
-                pit['hgid'] = base + pit['hgid']
-                pit['source'] = base + pit['source']
-                geometryIndex = pit['geometryIndex']
-                pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
-                pits.append(pit)
-            results.append((properties['type'], pits))
-        return results
+        try:
+            parsed = loads(body, parse_float=Decimal)
+            base = parsed['@context']['@base']
+            results = []
+            for feature in parsed['features']:
+                geometries = feature['geometry']['geometries']
+                properties = feature['properties']
+                pits = []
+                for pit in properties['pits']:
+                    pit['@base'] = base
+                    pit['@id'] = base + pit['@id']
+                    pit['hgid'] = base + pit['hgid']
+                    pit['source'] = base + pit['source']
+                    geometryIndex = pit['geometryIndex']
+                    pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
+                    pits.append(pit)
+                results.append((properties['type'], pits))
+            return results
+        except:
+            # print_exc()
+            print 'response body', body
+            import sys; sys.stdout.flush()
+            raise

@@ -213,7 +213,10 @@ def dna(reactor, config, statePath, out=stdout):
 
     erfGeoEnrichmentFromSummary = be(
         (ErfGeoEnrichmentFromSummary(),
-            (ErfGeoQuery(searchApiBaseUrl=searchApiBaseUrl),),
+            (ErfGeoQuery(searchApiBaseUrl=searchApiBaseUrl),
+                (LogComponent('httprequest'),),
+                (HttpRequest(),)
+            ),
             (PitToAnnotation(searchApiBaseUrl=searchApiBaseUrl),),
         )
     )
