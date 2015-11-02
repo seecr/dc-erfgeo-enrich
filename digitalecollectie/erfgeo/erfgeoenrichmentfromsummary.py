@@ -99,6 +99,8 @@ class ErfGeoEnrichmentFromSummary(Observable):
         locationValues, expectedType = self._recognizedParenthesizedParts(locationValues, expectedType)
         query = ', '.join(locationValues)
         query = self._sanitizeQuery(query)
+        if query and query.lower() == 'nederland' and expectedType is None:
+            expectedType = 'hg:Country'
         return query, expectedType
 
     def _recognizeLocationKeyValues(self, locationValues):
