@@ -42,6 +42,7 @@ class IndexFields(object):
             # in summary index
             'dc:creator',
             'dc:date',
+            'dc:date.year',
             'dc:language',
             'dc:publisher',
             'dc:subject',
@@ -67,7 +68,7 @@ class IndexFields(object):
                 yield fieldname, value
                 if self._inAll(fieldname):
                     yield ALL_FIELD, value
-        yield self._untokenizedField(fieldname, value)
+            yield self._untokenizedField(fieldname, value)
 
     def isSingleValueField(self, fieldname):
         return fieldname.startswith(SORTED_PREFIX)
