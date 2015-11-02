@@ -93,7 +93,6 @@ class PitToAnnotation(Observable):
         owlSameAs = pit.get('uri')
         if owlSameAs:
             yield '    <owl:sameAs rdf:resource="%s"/>\n' % xmlEscape(owlSameAs)
-        yield '    <dcterms:source rdf:resource="%s"/>\n' % xmlEscape(pit['source'])
         sameHgConceptRelations = getitem(pit.get('relations'), 'hg:sameHgConcept', [])
         for sameHgConcept in sameHgConceptRelations:
             yield self._renderSameHgConcept(pit['@base'] + sameHgConcept['@id'])

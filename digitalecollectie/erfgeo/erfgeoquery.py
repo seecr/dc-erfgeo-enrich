@@ -80,8 +80,6 @@ class ErfGeoQuery(Observable):
                 for pit in properties['pits']:
                     pit['@base'] = base
                     pit['@id'] = base + pit['@id']
-                    pit['hgid'] = base + pit['hgid']
-                    pit['source'] = base + pit['source']
                     geometryIndex = pit['geometryIndex']
                     pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
                     pits.append(pit)

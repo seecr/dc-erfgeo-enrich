@@ -51,11 +51,20 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
     def queryFromSummary(self, summary):
         annotationBody = xpathFirst(summary, 'oa:Annotation/oa:hasBody/*')
-        coverageValues = xpath(annotationBody, 'dc:coverage/text()') + xpath(annotationBody, 'dcterms:spatial/text()')
+        spatialValues = [s.strip() for s in xpath(annotationBody, 'dcterms:spatial[@xml:lang="nl"]/text()') if s.strip()]
+        if len(spatialValues) == 0:
+            spatialValues = [s.strip() for s in xpath(annotationBody, 'dcterms:spatial/text()') if s.strip()]
         for uri in xpath(annotationBody, 'dcterms:spatial/@rdf:resource'):
             for value in xpath(summary, '*[@rdf:about="%s"]/skos:prefLabel/text()' % uri):
-                coverageValues.append(value)
-        coverageValues = [s.strip() for s in coverageValues if s.strip()]
+                value = value.strip()
+                if value and not value in spatialValues:
+                    spatialValues.append(value)
+        if spatialValues:
+            coverageValues = spatialValues  # prefer the more specific relation; helps to ignore uses of dc:coverage for time related values
+        else:
+            coverageValues = [s.strip() for s in xpath(annotationBody, 'dc:coverage[@xml:lang="nl"]/text()') if s.strip()]
+            if len(coverageValues) == 0:
+                coverageValues = [s.strip() for s in xpath(annotationBody, 'dc:coverage/text()') if s.strip()]
         return self._queryFromCoverageValues(coverageValues)
 
     def annotationFromQuery(self, query, expectedType=None, targetUri=None):
