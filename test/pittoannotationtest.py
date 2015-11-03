@@ -76,3 +76,14 @@ class PitToAnnotationTest(SeecrTestCase):
         self.assertEquals(None, xpathFirst(annotation, '/rdf:RDF/oa:Annotation/dcterms:source/@rdf:resource'))
         self.assertEquals('No ErfGeo search API query could be constructed from target record', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/dcterms:description/text()'))
         self.assertEquals(None, xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:hasBody/rdf:Description'))
+
+    def testGeoCoordinatesInsteadOfPit(self):
+        pitToAnnotation = PitToAnnotation(searchApiBaseUrl="http://example.org/search")
+        annotation = pitToAnnotation.toAnnotation(pit=None, targetUri='the:uri', query=None, geoCoordinates=('5.0', '51.23'))
+        self.assertEquals('the:uri', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:hasTarget/@rdf:resource'))
+        self.assertEquals('http://data.digitalecollectie.nl/ns/oa#erfGeoEnriching', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:motivatedBy/@rdf:resource'))
+        self.assertEquals("http://data.digitalecollectie.nl/id/digitalecollectie", xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:annotatedBy/@rdf:resource'))
+        self.assertEquals(None, xpathFirst(annotation, '/rdf:RDF/oa:Annotation/dcterms:source'))
+        self.assertEquals('Geographical coordinates were already provided in original record', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/dcterms:description/text()'))
+        self.assertEquals('5.0', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:hasBody/rdf:Description/geo:lat/text()'))
+        self.assertEquals('51.23', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:hasBody/rdf:Description/geo:long/text()'))

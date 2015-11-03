@@ -44,9 +44,9 @@ class ErfGeoEnrichmentFromSummary(Observable):
     def annotationFromSummary(self, summary):
         targetUri = xpathFirst(summary, 'oa:Annotation/oa:hasTarget/@rdf:resource')
         annotationUri = ERFGEO_ENRICHMENT_PROFILE.uriFor(targetUri)
-        annotation = None
-        query, expectedType = self.queryFromSummary(summary)
-        annotation = yield self.annotationFromQuery(query, expectedType=expectedType, targetUri=targetUri)
+        geoCoordinates = self._geoCoordinatesPresent(summary)
+        query, expectedType = self.queryFromSummary(summary) if geoCoordinates is None else (None, None)
+        annotation = yield self.annotationFromQuery(query, expectedType=expectedType, targetUri=targetUri, geoCoordinates=geoCoordinates)
         raise StopIteration((annotationUri, annotation))
 
     def queryFromSummary(self, summary):
@@ -67,12 +67,12 @@ class ErfGeoEnrichmentFromSummary(Observable):
                 coverageValues = [s.strip() for s in xpath(annotationBody, 'dc:coverage/text()') if s.strip()]
         return self._queryFromCoverageValues(coverageValues)
 
-    def annotationFromQuery(self, query, expectedType=None, targetUri=None):
+    def annotationFromQuery(self, query, expectedType=None, targetUri=None, geoCoordinates=None):
         pit = None
         if query:
-            queryResults = yield self.any.queryErfGeoApi(query, expectedType=expectedType)
+            queryResults = yield self.any.queryErfGeoApi(query=query, expectedType=expectedType)
             pit = self.selectPit(queryResults, expectedType=expectedType)
-        raise StopIteration(self.call.toAnnotation(pit, targetUri, query))
+        raise StopIteration(self.call.toAnnotation(pit, targetUri, query, geoCoordinates=geoCoordinates))
 
     def selectPit(self, queryResults, expectedType=None):
         pits = None
@@ -94,13 +94,27 @@ class ErfGeoEnrichmentFromSummary(Observable):
         pit = first(pits)
         return pit
 
+    def _geoCoordinatesPresent(self, summary):
+        annotationBody = xpathFirst(summary, 'oa:Annotation/oa:hasBody/*')
+        resources = [annotationBody]
+        for uri in xpath(annotationBody, 'dcterms:spatial/@rdf:resource'):
+            resource = xpathFirst(summary, '*[@rdf:about="%s"]')
+            if not resource is None:
+                resources.append(resource)
+        for resource in resources:
+            geoLat = xpathFirst(resource, 'geo:lat/text()')
+            geoLong = xpathFirst(resource, 'geo:long/text()')
+            if geoLat and geoLong:
+                return (geoLat, geoLong)
+        return None
+
     def _queryFromCoverageValues(self, coverageValues):
         locationValues, expectedType = self._recognizeLocationKeyValues(coverageValues)
         locationValues, expectedType = self._recognizedParenthesizedParts(locationValues, expectedType)
         query = ', '.join(locationValues)
         query = self._sanitizeQuery(query)
-        if query and query.lower() == 'nederland' and expectedType is None:
-            expectedType = 'hg:Country'
+        if query.lower() == 'nederland' and expectedType is None:
+            query = None
         return query, expectedType
 
     def _recognizeLocationKeyValues(self, locationValues):

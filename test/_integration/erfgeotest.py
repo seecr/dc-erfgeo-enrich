@@ -30,7 +30,13 @@
 #
 ## end license ##
 
-from lxml.etree import XML
+from StringIO import StringIO
+from decimal import Decimal
+from urllib import urlencode
+
+from simplejson import loads
+
+from lxml.etree import XML, parse
 
 from seecr.test.utils import getRequest
 from seecr.test.integrationtestcase import IntegrationTestCase
@@ -38,9 +44,6 @@ from seecr.test.integrationtestcase import IntegrationTestCase
 from meresco.components import lxmltostring
 
 from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
-from simplejson import loads
-from decimal import Decimal
-from urllib import urlencode
 
 
 class ErfGeoTest(IntegrationTestCase):
@@ -82,8 +85,9 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(set(['NIOD', 'limburgs_erfgoed', 'geluidVanNl']), set(xpath(body, '//oai:setSpec/text()')))
 
     def testAbout(self):
-        header, body = getRequest(self.erfGeoEnrichmentPort, '/about', {'uri': 'NIOD_BBWO2:niod:3366459', 'profile': 'erfGeoEnrichment'})
-        rdf = xpathFirst(body, '/rdf:RDF')
+        header, body = getRequest(self.erfGeoEnrichmentPort, '/about', {'uri': 'NIOD_BBWO2:niod:3366459', 'profile': 'erfGeoEnrichment'}, parse=False)
+        bodyLxml = parse(StringIO(body))
+        rdf = xpathFirst(bodyLxml, '/rdf:RDF')
         self.assertEquals('http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', xpathFirst(rdf, 'oa:Annotation/@rdf:about'))
         self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource'))
         annotationBody = xpathFirst(rdf, 'oa:Annotation/oa:hasBody/rdf:Description')
@@ -142,6 +146,7 @@ class ErfGeoTest(IntegrationTestCase):
         spatial = d['result']['items'][0]['dcterms:spatial'][0]
         self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
         self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
+        self.assertEquals(sorted([{'count': 1, 'value': 'Amerikaanse Strijdkrachten'}, {'count': 1, 'value': 'Piloten'}, {'count': 1, 'value': 'Reddingswezen'}, {'count': 1, 'value': 'Uitrusting - Zie ook: Uniformen, Wapens'}, {'count': 1, 'value': 'Zeeoorlog'}]), sorted(d['result']['facets']['dc:subject']))
 
     def testSearchApiQueryWithUnsupportedParameter(self):
         body = self.getPage('/search?query=*&xyz=abc')
@@ -161,6 +166,12 @@ class ErfGeoTest(IntegrationTestCase):
 
     def testSearchApiDcDateYearRange(self):
         self.assertEquals(set(['limburgs_erfgoed:oai:le:RooyNet:37']), self._searchResultIds(q='dc:date.year>1700 AND dc:date.year<1990'))
+
+    def testDateYearFacet(self):
+        body = self.getPage('/search?query=*&facets=dc:date.year')
+        d = loads(body, parse_float=Decimal)
+        self.assertEquals(4, d['result']['total'])
+        self.assertEquals([{'count': 1, 'href': '/search?query=%2A+AND+dc%3Adate.year+exact+%221951%22&facets=dc%3Adate.year', 'value': '1951'}], d['result']['facets']['dc:date.year'])
 
     def _searchResultIds(self, q):
         body = self.getPage('/search?' + urlencode(dict(query=q)))

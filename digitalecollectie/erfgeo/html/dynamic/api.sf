@@ -68,7 +68,7 @@ E.g. <code><a href="/search?query=nachtwacht+AND+rembrandt&amp;facets=dc:subject
 <p>Currently, the following fields are available as facets:</p>
 
 <ul>'''
-    for field in (yield observable.any.drilldownFieldnames(core='erfGeoEnriched')).hits:
+    for field in sorted((yield observable.any.drilldownFieldnames(core='erfGeoEnriched')).hits):
         yield '<li>%s</li>\n' % escapeHtml(field.replace(UNTOKENIZED_PREFIX, ''))
     yield '''
 </ul>

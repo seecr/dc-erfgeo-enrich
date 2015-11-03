@@ -59,8 +59,8 @@ class ErfGeoQuery(Observable):
         self._path = parsedUrl.path
         self._ssl = (parsedUrl.scheme == 'https')
 
-    def queryErfGeoApi(self, s, expectedType=None):
-        queryDict = dict(q=s)
+    def queryErfGeoApi(self, query, expectedType=None):
+        queryDict = dict(q=query)
         if not expectedType is None:
             queryDict['type'] = expectedType
         response = yield self.any.httprequest(host=self._host, port=self._port, request=self._path + '?' + urlencode(queryDict), ssl=self._ssl)

@@ -160,6 +160,7 @@ def dna(reactor, config, statePath):
                             (PathFilter('/lucene'),
                                 (LuceneRemoteService(reactor=reactor),
                                     (CqlToLuceneQuery(unqualifiedFields=unqualifiedTermFields, luceneSettings=luceneSettings),
+                                        (LogComponent('luceneQuery'),),
                                         (lucene,),
                                     ),
                                 )

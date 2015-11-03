@@ -48,13 +48,13 @@ class PitToAnnotation(Observable):
         Observable.__init__(self, **kwargs)
         self._searchApiBaseUrl = searchApiBaseUrl
 
-    def toAnnotation(self, pit, targetUri=None, query=None):
+    def toAnnotation(self, pit, targetUri=None, query=None, geoCoordinates=None):
         uri = None
         if targetUri:
             uri = ERFGEO_ENRICHMENT_PROFILE.uriFor(targetUri)
-        return XML(asString(self._renderRdfXml(pit, uri=uri, targetUri=targetUri, query=query)))
+        return XML(asString(self._renderRdfXml(pit, uri=uri, targetUri=targetUri, query=query, geoCoordinates=geoCoordinates)))
 
-    def _renderRdfXml(self, pit, uri, targetUri, query):
+    def _renderRdfXml(self, pit, uri, targetUri, query, geoCoordinates=None):
         source = None
         if query:
             source = "%s?%s" % (self._searchApiBaseUrl, urlencode({'q': query}))
@@ -62,7 +62,7 @@ class PitToAnnotation(Observable):
         annotationRdfAbout = ''
         if uri:
             annotationRdfAbout = ' rdf:about="%s"' % uri
-        yield '    <oa:Annotation %(xmlns_oa)s %(xmlns_rdfs)s %(xmlns_dcterms)s %(xmlns_owl)s %(xmlns_hg)s %(xmlns_geos)s' % namespaces
+        yield '    <oa:Annotation %(xmlns_oa)s %(xmlns_rdfs)s %(xmlns_dcterms)s %(xmlns_owl)s %(xmlns_hg)s %(xmlns_geos)s %(xmlns_geo)s' % namespaces
         yield '%s\n>' % annotationRdfAbout
         yield '         <oa:annotatedBy rdf:resource="%s"/>\n' % uris.idDigitaleCollectie
         yield '         <oa:motivatedBy rdf:resource="%s"/>\n' % ERFGEO_ENRICHMENT_PROFILE.motive
@@ -72,6 +72,8 @@ class PitToAnnotation(Observable):
             yield '         <dcterms:source rdf:resource="%s"/>\n' % xmlEscape(source)
             if pit is None:
                 yield '         <dcterms:description>No PlaceInTime could be found for target record</dcterms:description>\n'
+        elif not geoCoordinates is None:
+            yield '         <dcterms:description>Geographical coordinates were already provided in original record</dcterms:description>\n'
         else:
             yield '         <dcterms:description>No ErfGeo search API query could be constructed from target record</dcterms:description>\n'
         if not pit is None:
@@ -82,6 +84,15 @@ class PitToAnnotation(Observable):
             yield '                 </dcterms:spatial>\n'
             yield '             </rdf:Description>\n'
             yield '         </oa:hasBody>\n'
+        elif not geoCoordinates is None:
+            geoLat, geoLong = geoCoordinates
+            yield '         <oa:hasBody>\n'
+            yield '             <rdf:Description>\n'
+            yield '                 <geo:lat>%s</geo:lat>\n' % geoLat
+            yield '                 <geo:long>%s</geo:long>\n' % geoLong
+            yield '             </rdf:Description>\n'
+            yield '         </oa:hasBody>\n'
+
         yield '    </oa:Annotation>\n'
         yield '</rdf:RDF>\n'
 
