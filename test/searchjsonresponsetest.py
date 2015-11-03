@@ -71,7 +71,8 @@ class SearchJsonResponseTest(SeecrTestCase):
         self.assertEquals('/sru?version=1.1&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', result['sruRequest'])
         self.assertEquals(1, result['total'])
         self.assertEquals(result['total'], len(result['items']))
-        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['@id'])
+        self.assertEquals('http://data.digitalecollectie.nl/annotation/summary#bGltYnVyZ3NfZXJmZ29lZF9mcm9tX2RpZ2l0YWxlX2NvbGxlY3RpZTpvYWk6ZGF0YS5kaWdpdGFsZWNvbGxlY3RpZS5ubDpsaW1idXJnc19lcmZnb2VkOm9haTpsZTpSb295TmV0OjM3', result['items'][0]['@id'])
+        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['oa:hasTarget'])
         facets = result['facets']
         self.assertEquals([{'count': 1, 'value': 'RooyNet (limburgserfgoed.nl)'}], facets['edm:dataProvider'])
         self.assertEquals([
@@ -117,9 +118,9 @@ class SearchJsonResponseTest(SeecrTestCase):
 
     def testSummaryWithEnrichmentToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT))
-        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['@id'])
+        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['oa:hasTarget'])
         context = result['@context']
-        self.assertEquals(['dc', 'dcterms', 'edm', 'edm:isShownAt', 'edm:isShownBy', 'edm:object', 'edm:rights', 'geos', 'geos:hasGeometry', 'hg', 'hg:sameHgConcept', 'rdfs'], sorted(context.keys()))
+        self.assertEquals(['dc', 'dcterms', 'edm', 'edm:isShownAt', 'edm:isShownBy', 'edm:object', 'edm:rights', 'geos', 'geos:hasGeometry', 'hg', 'hg:sameHgConcept', 'oa', 'rdfs'], sorted(context.keys()))
         self.assertEquals('http://www.europeana.eu/schemas/edm/', context['edm'])
         self.assertEquals(['http://www.limburgserfgoed.nl/detail/RooyNet/37'], result['dc:identifier'])
         self.assertEquals(['gemeente: Venray', 'dorp: Leunen', 'straat: Leunseweg'], result['dc:coverage'])
@@ -136,7 +137,7 @@ class SearchJsonResponseTest(SeecrTestCase):
 
     def testSummaryWithConceptsToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT_WITH_CONCEPTS))
-        self.assertEquals('geluidVanNl:geluid_van_nederland:43663591', result['@id'])
+        self.assertEquals('geluidVanNl:geluid_van_nederland:43663591', result['oa:hasTarget'])
         self.assertEquals('Eigen Opnames', result['dc:subject'][0])
         self.assertEquals('voetstappen', result['dc:subject'][1]['skos:prefLabel'])
         self.assertEquals('Nederland', result['dcterms:spatial'][0]['skos:prefLabel'])

@@ -176,7 +176,7 @@ class ErfGeoTest(IntegrationTestCase):
     def _searchResultIds(self, q):
         body = self.getPage('/search?' + urlencode(dict(query=q)))
         d = loads(body, parse_float=Decimal)
-        return set([item['@id'] for item in d['result']['items']])
+        return set([item['oa:hasTarget'] for item in d['result']['items']])
 
     def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'

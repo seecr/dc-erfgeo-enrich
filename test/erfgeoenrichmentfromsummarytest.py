@@ -116,6 +116,17 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         self.assertEquals("Groot-Brittanië", query)
         self.assertEquals(None, expectedType)
 
+    def testJustNederlandNotQueried(self):
+        egefs = ErfGeoEnrichmentFromSummary()
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(["Nederland"]))
+        self.assertEquals(None, query)
+        self.assertEquals(None, expectedType)
+
+        egefs = ErfGeoEnrichmentFromSummary()
+        query, expectedType = egefs.queryFromSummary(summary=makeSummary(["Veenendaal", "Nederland"]))
+        self.assertEquals('Veenendaal, Nederland', query)
+        self.assertEquals(None, expectedType)
+
     def testSelectPit(self):
         egefs = ErfGeoEnrichmentFromSummary()
         pit = egefs.selectPit(QUERY_RESULTS, expectedType=None)

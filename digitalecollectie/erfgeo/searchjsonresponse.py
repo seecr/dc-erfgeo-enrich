@@ -176,10 +176,11 @@ def summaryWithEnrichmentToJsonLd(rdf):
             if elementCurie in RESOURCE_RELATIONS:
                 context[elementCurie] = {"@type": "@id"}
 
-    context = {}
+    context = {'oa': namespaces.oa}
     d = {
         '@context': context,
-        '@id': xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource')
+        '@id': xpathFirst(rdf, 'oa:Annotation/@rdf:about'),
+        'oa:hasTarget': xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource')
     }
     for annotationBody in xpath(rdf, 'oa:Annotation/oa:hasBody/rdf:Description'):
         for element in annotationBody.iterchildren(tag=Element):
