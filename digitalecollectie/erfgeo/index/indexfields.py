@@ -54,7 +54,9 @@ class IndexFields(object):
             'oai:setSpec',
         ]
     ]
-    untokenizedFieldnames = [df.name for df in drilldownFields]
+    untokenizedFieldnames = [df.name for df in drilldownFields] + [
+        'untokenized.id',
+    ]
 
     def __init__(self, observable):
         self._observable = observable
@@ -135,7 +137,8 @@ PREFIX_RENAMES = [
     ('meta:baseurl', ''),
     ('meta:metadataPrefix', ''),
     ('meta:set', ''),
-    ('dcterms:spatial.hg:PlaceInTime', 'dcterms:spatial')
+    ('dcterms:spatial.hg:PlaceInTime', 'dcterms:spatial'),
+    ('oa:hasTarget.uri', 'id')
 ]
 UNWANTED_FIELDS = [
     #'oa:hasTarget.uri',

@@ -83,16 +83,9 @@ staticHtmlFilePath = join(htmlPath, 'static')
 IP_ADDRESS = gethostbyname(gethostname())
 DRILLDOWN_MAXIMUM = 250
 
-drilldownFieldnames = [
-    UNTOKENIZED_PREFIX + 'record.subject',
-    UNTOKENIZED_PREFIX + 'meta.repository.repositoryGroupId',
-] + [df.name for df in IndexFields.drilldownFields]
-
-untokenizedFieldnames = drilldownFieldnames[:]
-
 cqlClauseConverters = [
     RenameFieldForExact(
-        untokenizedFields=untokenizedFieldnames,
+        untokenizedFields=IndexFields.untokenizedFieldnames,
         untokenizedPrefix=UNTOKENIZED_PREFIX,
     ).filterAndModifier(),
     RewriteBoundingBoxFields().filterAndModifier(),
@@ -214,7 +207,6 @@ def dna(reactor, config, statePath, out=stdout):
     erfGeoEnrichmentFromSummary = be(
         (ErfGeoEnrichmentFromSummary(),
             (ErfGeoQuery(searchApiBaseUrl=searchApiBaseUrl),
-                (LogComponent('httprequest'),),
                 (HttpRequest(),)
             ),
             (PitToAnnotation(searchApiBaseUrl=searchApiBaseUrl),),

@@ -81,7 +81,6 @@ unqualifiedTermFields = [(ALL_FIELD, 1.0)]
 fieldRegistry = FieldRegistry(drilldownFields=IndexFields.drilldownFields)
 fieldRegistry.register('dcterms:spatial.geo:long', fieldDefinition=DOUBLEFIELD)
 fieldRegistry.register('dcterms:spatial.geo:lat', fieldDefinition=DOUBLEFIELD)
-untokenizedFieldnames = [df.name for df in IndexFields.drilldownFields]
 
 parseHugeOptions = dict(huge_tree=True, remove_blank_text=True)
 
@@ -160,7 +159,6 @@ def dna(reactor, config, statePath):
                             (PathFilter('/lucene'),
                                 (LuceneRemoteService(reactor=reactor),
                                     (CqlToLuceneQuery(unqualifiedFields=unqualifiedTermFields, luceneSettings=luceneSettings),
-                                        (LogComponent('luceneQuery'),),
                                         (lucene,),
                                     ),
                                 )

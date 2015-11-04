@@ -62,17 +62,16 @@ class SearchJsonResponseTest(SeecrTestCase):
             )
         )
         result = asString(top.all.handleRequest(arguments={'query': ['fiets']}))
-        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.1&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
+        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         self.assertTrue('Access-Control-Allow-Origin: *' in header)
         result = loads(body, parse_float=Decimal)
         result = result['result']
         self.assertEquals('/search?query=fiets', result['request'])
-        self.assertEquals('/sru?version=1.1&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', result['sruRequest'])
+        self.assertEquals('/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', result['sruRequest'])
         self.assertEquals(1, result['total'])
         self.assertEquals(result['total'], len(result['items']))
-        self.assertEquals('http://data.digitalecollectie.nl/annotation/summary#bGltYnVyZ3NfZXJmZ29lZF9mcm9tX2RpZ2l0YWxlX2NvbGxlY3RpZTpvYWk6ZGF0YS5kaWdpdGFsZWNvbGxlY3RpZS5ubDpsaW1idXJnc19lcmZnb2VkOm9haTpsZTpSb295TmV0OjM3', result['items'][0]['@id'])
-        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['oa:hasTarget'])
+        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['items'][0]['@id'])
         facets = result['facets']
         self.assertEquals([{'count': 1, 'value': 'RooyNet (limburgserfgoed.nl)'}], facets['edm:dataProvider'])
         self.assertEquals([
@@ -106,7 +105,7 @@ class SearchJsonResponseTest(SeecrTestCase):
             )
         )
         result = asString(top.all.handleRequest(arguments={'query': ['fiets'], 'facets': ['dc:subject,edm:dataProvider']}))
-        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.1&operation=searchRetrieve&query=fiets&x-term-drilldown=dc%3Asubject%2Cedm%3AdataProvider', 'port': 3333}], httpRequests)
+        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=dc%3Asubject%2Cedm%3AdataProvider', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         result = loads(body, parse_float=Decimal)
         facets = result['result']['facets']
@@ -118,7 +117,7 @@ class SearchJsonResponseTest(SeecrTestCase):
 
     def testSummaryWithEnrichmentToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT))
-        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['oa:hasTarget'])
+        self.assertEquals('limburgs_erfgoed:oai:le:RooyNet:37', result['@id'])
         context = result['@context']
         self.assertEquals(['dc', 'dcterms', 'edm', 'edm:isShownAt', 'edm:isShownBy', 'edm:object', 'edm:rights', 'geos', 'geos:hasGeometry', 'hg', 'hg:sameHgConcept', 'oa', 'rdfs'], sorted(context.keys()))
         self.assertEquals('http://www.europeana.eu/schemas/edm/', context['edm'])
@@ -137,7 +136,7 @@ class SearchJsonResponseTest(SeecrTestCase):
 
     def testSummaryWithConceptsToJsonLd(self):
         result = summaryWithEnrichmentToJsonLd(XML(RDF_INPUT_WITH_CONCEPTS))
-        self.assertEquals('geluidVanNl:geluid_van_nederland:43663591', result['oa:hasTarget'])
+        self.assertEquals('geluidVanNl:geluid_van_nederland:43663591', result['@id'])
         self.assertEquals('Eigen Opnames', result['dc:subject'][0])
         self.assertEquals('voetstappen', result['dc:subject'][1]['skos:prefLabel'])
         self.assertEquals('Nederland', result['dcterms:spatial'][0]['skos:prefLabel'])

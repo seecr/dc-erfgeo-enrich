@@ -77,7 +77,7 @@ class SearchJsonResponse(Observable):
             facets = ['edm:dataProvider', 'dc:subject']
         if not 'x-termdrilldown' in arguments:
             sruArguments['x-term-drilldown'] = ','.join(facets)
-        return [('version', ['1.1']), ('operation', 'searchRetrieve')] + sruArguments.items()
+        return [('version', ['1.2']), ('operation', 'searchRetrieve')] + sruArguments.items()
 
     def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
         request = '/search?' + urlencode(arguments, doseq=True)
@@ -179,8 +179,7 @@ def summaryWithEnrichmentToJsonLd(rdf):
     context = {'oa': namespaces.oa}
     d = {
         '@context': context,
-        '@id': xpathFirst(rdf, 'oa:Annotation/@rdf:about'),
-        'oa:hasTarget': xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource')
+        '@id': xpathFirst(rdf, 'oa:Annotation/oa:hasTarget/@rdf:resource'),
     }
     for annotationBody in xpath(rdf, 'oa:Annotation/oa:hasBody/rdf:Description'):
         for element in annotationBody.iterchildren(tag=Element):

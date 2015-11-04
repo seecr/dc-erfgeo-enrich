@@ -34,7 +34,7 @@ from StringIO import StringIO
 from decimal import Decimal
 from urllib import urlencode
 
-from simplejson import loads
+from simplejson import loads, dumps
 
 from lxml.etree import XML, parse
 
@@ -107,6 +107,8 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertSruQuery(2, 'meta:repositoryGroupId exact "NIOD"')
         self.assertSruQuery(1, 'dcterms:spatial=Soestdijk')
         self.assertSruQuery(1, 'dcterms:spatial=Leunseweg')
+        self.assertSruQuery(1, '__id__ exact "http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk="')
+        self.assertSruQuery(1, 'id exact "NIOD_BBWO2:niod:3366459"')
 
     def testSruGeoRangesHits(self):
         self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146']), 'dcterms:spatial.geo:long<5')
@@ -122,11 +124,14 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertEquals(2, len(rdfXml.getchildren()))
         self.assertEquals('Verenigde Staten', xpathFirst(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dc:coverage/text()'))
         self.assertEquals(1, len(xpath(rdfXml, 'oa:Annotation/oa:hasBody/rdf:Description/dcterms:spatial/hg:PlaceInTime')))
+        self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(rdfXml, 'oa:Annotation/oa:hasTarget/@rdf:resource'))
+        self.assertEquals(['http://data.digitalecollectie.nl/annotation/summary#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', 'http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk='], xpath(rdfXml, 'oa:Annotation/@rdf:about'))
 
     def testSearchApi(self):
         body = self.getPage('/search?query=Zeeoorlog')
         d = loads(body, parse_float=Decimal)
         self.assertEquals(1, d['result']['total'])
+        self.assertEquals('NIOD_BBWO2:niod:3366459', d['result']['items'][0]['@id'])
         spatial = d['result']['items'][0]['dcterms:spatial'][0]
         self.assertEquals(['Soestdijk'], spatial['rdfs:label'])
         self.assertEquals(['POINT(5.28472 52.19083)'], spatial['geos:hasGeometry'][0]['geos:asWKT'])
@@ -176,7 +181,7 @@ class ErfGeoTest(IntegrationTestCase):
     def _searchResultIds(self, q):
         body = self.getPage('/search?' + urlencode(dict(query=q)))
         d = loads(body, parse_float=Decimal)
-        return set([item['oa:hasTarget'] for item in d['result']['items']])
+        return set([item['@id'] for item in d['result']['items']])
 
     def assertSruQuery(self, expectedHits, query, path=None, additionalHeaders=None):
         path = path or '/sru'
@@ -194,7 +199,7 @@ class ErfGeoTest(IntegrationTestCase):
 
     def _doQuery(self, query, path=None, additionalHeaders=None, statusCode='200'):
         path = path or '/sru'
-        queryArguments = {'query': query, 'version': '1.1', 'operation': 'searchRetrieve'}
+        queryArguments = {'query': query, 'version': '1.2', 'operation': 'searchRetrieve'}
         header, body = getRequest(self.erfGeoEnrichmentPort, path, queryArguments, parse=False, additionalHeaders=additionalHeaders)
         self.assertTrue(statusCode in header.split('\r\n', 1)[0])
         bodyLxml = XML(body)
@@ -203,5 +208,3 @@ class ErfGeoTest(IntegrationTestCase):
     def getPage(self, path, arguments=None):
         header, body = getRequest(self.erfGeoEnrichmentPort, path, arguments if arguments else {}, parse=False)
         return body
-
-
