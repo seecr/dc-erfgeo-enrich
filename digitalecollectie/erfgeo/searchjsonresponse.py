@@ -137,7 +137,10 @@ def summaryWithEnrichmentToJsonLd(rdf):
             processRelationElement(d, child)
 
     def processRelationElement(d, element):
-        elementCurie = tagToCurie(element.tag)
+        try:
+            elementCurie = tagToCurie(element.tag)
+        except KeyError:
+            return
         if elementCurie == 'prov:wasDerivedFrom':
             return
         objects = []
