@@ -96,14 +96,16 @@ class ErfGeoEnrichmentFromSummary(Observable):
 
     def _geoCoordinatesPresent(self, summary):
         annotationBody = xpathFirst(summary, 'oa:Annotation/oa:hasBody/*')
-        resources = [annotationBody]
+        nodes = [annotationBody]
         for uri in xpath(annotationBody, 'dcterms:spatial/@rdf:resource'):
-            resource = xpathFirst(summary, '*[@rdf:about="%s"]')
-            if not resource is None:
-                resources.append(resource)
-        for resource in resources:
-            geoLat = xpathFirst(resource, 'geo:lat/text()')
-            geoLong = xpathFirst(resource, 'geo:long/text()')
+            node = xpathFirst(summary, '*[@rdf:about="%s"]')
+            if not node is None:
+                nodes.append(node)
+        for node in xpath(annotationBody, 'dcterms:spatial/rdf:Description'):
+            nodes.append(node)
+        for node in nodes:
+            geoLat = xpathFirst(node, 'geo:lat/text()')
+            geoLong = xpathFirst(node, 'geo:long/text()')
             if geoLat and geoLong:
                 return (geoLat, geoLong)
         return None
