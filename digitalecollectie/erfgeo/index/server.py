@@ -60,7 +60,8 @@ def initJVM():
         pass
 initJVM()
 
-from meresco.lucene import LuceneSettings, Lucene, CqlToLuceneQuery, TermNumerator
+from meresco.lucene import LuceneSettings, Lucene, TermNumerator
+from meresco.lucene.queryexpressiontolucenequery import QueryExpressionToLuceneQuery
 from meresco.lucene.fieldregistry import FieldRegistry, DOUBLEFIELD
 from meresco.lucene.remote import LuceneRemoteService
 
@@ -158,7 +159,7 @@ def dna(reactor, config, statePath):
                         (BasicHttpHandler(),
                             (PathFilter('/lucene'),
                                 (LuceneRemoteService(reactor=reactor),
-                                    (CqlToLuceneQuery(unqualifiedFields=unqualifiedTermFields, luceneSettings=luceneSettings),
+                                    (QueryExpressionToLuceneQuery(unqualifiedTermFields=unqualifiedTermFields, luceneSettings=luceneSettings),
                                         (lucene,),
                                     ),
                                 )

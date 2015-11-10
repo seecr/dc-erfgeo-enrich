@@ -50,13 +50,15 @@ from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
 from meresco.components.log import LogComponent
 from meresco.components.http import ObservableHttpServer, PathFilter, StringServer
 from meresco.components.http.utils import ContentTypePlainText
-from meresco.oai import OaiJazz, OaiPmh
+from meresco.oai import OaiJazz, OaiPmh, SuspendRegister
 from meresco.oai.oaijazz import DEFAULT_BATCH_SIZE
 
 
 def prepareOaiPmh(dataDirs, tempDir, storage, batchSize):
     print 'DATADIRS', dataDirs
+    oaiSuspendRegister = SuspendRegister()
     oaiJazz = OaiJazz(tempDir)
+    oaiJazz.addObserver(oaiSuspendRegister)
     oaiJazzOperations = {
         'ADD': oaiJazz.addOaiRecord,
         'DEL': oaiJazz.deleteOaiRecord
@@ -76,8 +78,9 @@ def prepareOaiPmh(dataDirs, tempDir, storage, batchSize):
     oaiPmh = be(
         (IllegalFromFix(),
             (OaiPmh(repositoryName='Mock', adminEmail='no@example.org', supportXWait=True, batchSize=batchSize),
-                (LogComponent('OaiPmh'),),
+                # (LogComponent('OaiPmh'),),
                 (oaiJazz,),
+                (oaiSuspendRegister,),
                 (storage,),
             )
         )

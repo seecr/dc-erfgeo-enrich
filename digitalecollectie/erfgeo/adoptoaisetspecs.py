@@ -44,12 +44,12 @@ class AdoptOaiSetSpecs(Observable):
         newSetSpecsFromOriginals = newSetSpecsFromOriginals or (lambda x: x)
         self._newSetSpecsFromOriginals = newSetSpecsFromOriginals
 
-    def addOaiRecord(self, identifier, sets, metadataFormats):
-        setSpecs = callStackDictGet('setSpecs')
+    def addOaiRecord(self, identifier, setSpecs, metadataPrefixes):
+        callStackSetSpecs = callStackDictGet('setSpecs')
         self.do.addOaiRecord(
             identifier=identifier,
-            sets=sets + [(v, v) for v in self._newSetSpecsFromOriginals(setSpecs)],
-            metadataFormats=metadataFormats
+            setSpecs=setSpecs + list(self._newSetSpecsFromOriginals(callStackSetSpecs)),
+            metadataPrefixes=metadataPrefixes
         )
 
 

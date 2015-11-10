@@ -52,15 +52,15 @@ class AdoptOaiSetSpecsTest(TestCase):
 
         observable.do.addOaiRecord(
             identifier='identifier',
-            sets=[('aSet', 'aSet')],
-            metadataFormats=[('ese', '', 'http://www.europeana.eu/schemas/ese/')]
+            setSpecs=['aSet'],
+            metadataPrefixes=['ese']
         )
         self.assertEquals(['addOaiRecord'], [m.name for m in observer.calledMethods])
         self.assertEquals(
             {
                 'identifier': 'identifier',
-                'metadataFormats': [('ese', '', 'http://www.europeana.eu/schemas/ese/')],
-                'sets': [('aSet', 'aSet'), ('x:y%25z', 'x:y%25z'), ('x:y%25z:set1', 'x:y%25z:set1'), ('x:y%25z:set2', 'x:y%25z:set2')]
+                'metadataPrefixes': ['ese'],
+                'setSpecs': ['aSet', 'x:y%25z', 'x:y%25z:set1', 'x:y%25z:set2']
             },
             observer.calledMethods[0].kwargs
         )
@@ -79,15 +79,15 @@ class AdoptOaiSetSpecsTest(TestCase):
 
         observable.do.addOaiRecord(
             identifier='identifier',
-            sets=[('aSet', 'aSet')],
-            metadataFormats=[('ese', '', 'http://www.europeana.eu/schemas/ese/')]
+            setSpecs=['aSet'],
+            metadataPrefixes=['ese']
         )
         self.assertEquals(['addOaiRecord'], [m.name for m in observer.calledMethods])
         self.assertEquals(
             {
                 'identifier': 'identifier',
-                'metadataFormats': [('ese', '', 'http://www.europeana.eu/schemas/ese/')],
-                'sets': [('aSet', 'aSet'), ('collection1', 'collection1'), ('collection1:set1', 'collection1:set1')]
+                'metadataPrefixes': ['ese'],
+                'setSpecs': ['aSet', 'collection1', 'collection1:set1']
             },
             observer.calledMethods[0].kwargs
         )
@@ -107,16 +107,15 @@ class AdoptOaiSetSpecsTest(TestCase):
 
         observable.do.addOaiRecord(
             identifier='identifier',
-            sets=[('aSet', 'aSet')],
-            metadataFormats=[('ese', '', 'http://www.europeana.eu/schemas/ese/')]
+            setSpecs=['aSet'],
+            metadataPrefixes=['ese']
         )
         self.assertEquals(['addOaiRecord'], [m.name for m in observer.calledMethods])
         self.assertEquals(
             {
                 'identifier': 'identifier',
-                'metadataFormats': [('ese', '', 'http://www.europeana.eu/schemas/ese/')],
-                'sets': [('aSet', 'aSet'), ('set1', 'set1')]
+                'metadataPrefixes': ['ese'],
+                'setSpecs': ['aSet', 'set1']
             },
             observer.calledMethods[0].kwargs
         )
-

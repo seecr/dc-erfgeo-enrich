@@ -32,7 +32,7 @@
 
 from seecr.test import SeecrTestCase
 
-from cqlparser import cql2string, parseString
+from cqlparser import cqlToExpression
 from meresco.components import CqlMultiSearchClauseConversion
 
 from digitalecollectie.erfgeo.rewriteboundingboxfields import RewriteBoundingBoxFields
@@ -40,16 +40,17 @@ from digitalecollectie.erfgeo.rewriteboundingboxfields import RewriteBoundingBox
 
 class RewriteBoundingBoxFieldsTest(SeecrTestCase):
     def testNothingToBeDone(self):
-        self.assertEquals('field=value', self.convert('field=value'))
+        self.assertEquals(cqlToExpression('field=value'), self.convert('field=value'))
 
     def testRewrite(self):
-        self.assertEquals('dcterms:spatial.geo:lat > 1.23', self.convert('minGeoLat=1.23'))
-        self.assertEquals('dcterms:spatial.geo:lat < 7.23', self.convert('maxGeoLat = 7.23'))
-        self.assertEquals('dcterms:spatial.geo:long > 50.23', self.convert('minGeoLong=50.23'))
-        self.assertEquals('dcterms:spatial.geo:long < 52.23', self.convert('maxGeoLong = 52.23'))
+        self.assertEquals(cqlToExpression('dcterms:spatial.geo:lat > 1.23'), self.convert('minGeoLat=1.23'))
+        self.assertEquals(cqlToExpression('dcterms:spatial.geo:lat < 7.23'), self.convert('maxGeoLat = 7.23'))
+        self.assertEquals(cqlToExpression('dcterms:spatial.geo:long > 50.23'), self.convert('minGeoLong=50.23'))
+        self.assertEquals(cqlToExpression('dcterms:spatial.geo:long < 52.23'), self.convert('maxGeoLong = 52.23'))
 
     def convert(self, cqlString):
         converter = CqlMultiSearchClauseConversion([
-                RewriteBoundingBoxFields().filterAndModifier()
-            ], fromKwarg="cqlAbstractSyntaxTree")
-        return cql2string(converter._convert(parseString(cqlString)))
+            RewriteBoundingBoxFields().filterAndModifier()
+        ], fromKwarg="query")
+        query = cqlToExpression(cqlString)
+        return converter._convert(query=query)

@@ -62,8 +62,12 @@ class SearchJsonResponse(Observable):
         header, body = response.split(CRLF * 2)
         jsonResponse = self._sruResponseToJson(arguments=arguments, sruResponseLxml=XML(body), sruRequest=sruRequest)
         yield 'HTTP/1.0 200 OK' + CRLF
+        yield 'Content-Type: application/json' + CRLF
         yield 'Access-Control-Allow-Origin: *' + CRLF
-        yield 'Content-Type: application/json' + CRLF * 2
+        yield 'Access-Control-Allow-Headers: X-Requested-With' + CRLF
+        yield 'Access-Control-Allow-Methods: GET, POST, OPTIONS' + CRLF
+        yield 'Access-Control-Max-Age: 86400' + CRLF
+        yield CRLF
         yield jsonResponse
 
     def _rewriteArgumentsForSru(self, arguments):

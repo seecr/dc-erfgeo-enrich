@@ -31,17 +31,11 @@
 
 
 class RewriteBoundingBoxFields(object):
-    def canModify(self, node):
-        #SEARCH_CLAUSE(INDEX(...), RELATION(COMPARITOR('=')), SEARCH_TERM(..))
-        return len(node.children) == 3 and \
-                node.children[0].children[0].children[0] in fieldOperatorMapping and \
-                node.children[1].children[0].children[0] == '='
+    def canModify(self, expression):
+        return expression.index in fieldOperatorMapping and expression.relation == '='
 
-    def modify(self, node):
-        realName, operator = fieldOperatorMapping[node.children[0].children[0].children[0]]
-        node.children[0].children[0].children = (realName,)
-        node.children[1].children[0].children = (operator,)
-        return node
+    def modify(self, expression):
+        expression.index, expression.relation = fieldOperatorMapping[expression.index]
 
     def filterAndModifier(self):
         return self.canModify, self.modify

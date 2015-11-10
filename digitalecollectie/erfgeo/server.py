@@ -50,7 +50,7 @@ from meresco.components.http.utils import ContentTypePlainText
 from meresco.components.log import LogComponent
 from meresco.lucene import UNTOKENIZED_PREFIX
 from meresco.lucene.remote import LuceneRemote
-from meresco.oai import OaiJazz, OaiPmh, OaiAddRecordWithDefaults
+from meresco.oai import OaiJazz, OaiPmh, OaiAddDeleteRecordWithPrefixesAndSetSpecs, SuspendRegister
 from meresco.sequentialstore import MultiSequentialStorage, AddDeleteToMultiSequential
 from meresco.html import DynamicHtml
 
@@ -150,10 +150,8 @@ def createUploadHelix(oaiJazz, storage, erfGeoEnrichmentFromSummary):
                                         (storage,),
                                     )
                                 ),
-                                (OaiAddRecordWithDefaults(
-                                        metadataFormats=lambda **kwargs: [
-                                            ERFGEO_ANNOTATION_METADATA_FORMAT, COMBINED_ANNOTATION_METADATA_FORMAT
-                                        ]),
+                                (OaiAddDeleteRecordWithPrefixesAndSetSpecs(
+                                        metadataPrefixes=['erfGeoEnrichment', 'erfGeoEnrichment+summary']),
                                     (AdoptOaiSetSpecs(),
                                         (oaiJazz,)
                                     )
@@ -189,7 +187,12 @@ def dna(reactor, config, statePath, out=stdout):
 
     observableHttpServer = ObservableHttpServer(reactor, portNumber, prio=1)
 
-    oaiJazz = OaiJazz(oaiPath)
+    oaiSuspendRegister = SuspendRegister()
+    oaiJazz = be((OaiJazz(oaiPath),
+        (oaiSuspendRegister,)
+    ))
+    oaiJazz.updateMetadataFormat(*ERFGEO_ANNOTATION_METADATA_FORMAT)
+    oaiJazz.updateMetadataFormat(*COMBINED_ANNOTATION_METADATA_FORMAT)
     erfGeoEnrichmentStorage = MultiSequentialStorage(join(statePath, 'storage'))
 
     digitaleCollectieOaiPath = '/oai'
@@ -222,6 +225,7 @@ def dna(reactor, config, statePath, out=stdout):
     return \
         (Observable(),
             (oaiSetsHarvester,
+                (oaiSuspendRegister,),
                 (erfGeoSetsSelection,),
                 uploadHelix
             ),
@@ -240,6 +244,7 @@ def dna(reactor, config, statePath, out=stdout):
                                     supportXWait=True),
                                 (SeecrOaiWatermark(),),
                                 (oaiJazz,),
+                                (oaiSuspendRegister,),
                                 (MaybeCombineWithSummary(),
                                     (erfGeoEnrichmentStorage,),
                                 )
@@ -248,11 +253,13 @@ def dna(reactor, config, statePath, out=stdout):
                         (PathFilter("/sru"),
                             (SruParser(defaultRecordSchema='erfGeoEnrichment+summary', defaultRecordPacking='xml'),
                                 (SruHandler(drilldownMaximumMaximumResults=DRILLDOWN_MAXIMUM),
-                                    (CqlMultiSearchClauseConversion(
-                                          cqlClauseConverters,
-                                          fromKwarg='cqlAbstractSyntaxTree'),
-                                        (TranslateDrilldownFieldnames(translate=lambda field: UNTOKENIZED_PREFIX + field),
-                                            (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
+                                    (FilterMessages(allowed=['executeQuery']),
+                                        (CqlMultiSearchClauseConversion(
+                                              cqlClauseConverters,
+                                              fromKwarg='query'),
+                                            (TranslateDrilldownFieldnames(translate=lambda field: UNTOKENIZED_PREFIX + field),
+                                                (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
+                                            ),
                                         ),
                                     ),
                                     (MaybeCombineWithSummary(),
