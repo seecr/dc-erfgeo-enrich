@@ -68,7 +68,7 @@ class ErfGeoTest(IntegrationTestCase):
 
         annotation = d['NIOD_BBWO2:niod:3366459']
         self.assertEquals('http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk=', xpathFirst(annotation, '@rdf:about'))
-        self.assertEquals('http://localhost:%s?q=Verenigde+Staten' % self.erfGeoApiPort, xpathFirst(annotation, 'dcterms:source/@rdf:resource'))
+        self.assertEquals('http://localhost:%s?q=%%22Verenigde+Staten%%22' % self.erfGeoApiPort, xpathFirst(annotation, 'dcterms:source/@rdf:resource'))
         self.assertEquals('NIOD_BBWO2:niod:3366459', xpathFirst(annotation, 'oa:hasTarget/@rdf:resource'))
         annotationBody = xpathFirst(annotation, 'oa:hasBody/rdf:Description')
         placeInTime = xpathFirst(annotationBody, 'dcterms:spatial/hg:PlaceInTime')

@@ -48,72 +48,72 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
     def testQueryFromSummary(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Turbinestraat 9', 'Veenendaal']))
-        self.assertEquals('Turbinestraat 9, Veenendaal', query)
+        self.assertEquals('"Turbinestraat 9", "Veenendaal"', query)
         self.assertEquals(None, expectedType)
 
     def testQueryFromSummaryStraatDorpGemeente(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['straat: Leunseweg', 'dorp: Leunen', 'gemeente: Venray']))
-        self.assertEquals('Leunseweg, Leunen, Venray', query)
+        self.assertEquals('"Leunseweg", "Leunen", "Venray"', query)
         self.assertEquals('hg:Street', expectedType)
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['gemeente: Venray', 'straat: Leunseweg', 'dorp: Leunen']))
-        self.assertEquals('Leunseweg, Leunen, Venray', query)
+        self.assertEquals('"Leunseweg", "Leunen", "Venray"', query)
         self.assertEquals('hg:Street', expectedType)
 
     def testQueryFromSummaryDorpGemeente(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['gemeente: Venray', 'dorp: Leunen', ]))
-        self.assertEquals('Leunen, Venray', query)
+        self.assertEquals('"Leunen", "Venray"', query)
         self.assertEquals('hg:Place', expectedType)
 
     def testQueryFromSummaryWithParenthesizedLiesIn(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Serooskerke (Walcheren)']))
-        self.assertEquals('Serooskerke, Walcheren', query)
+        self.assertEquals('"Serooskerke", "Walcheren"', query)
         self.assertEquals(None, expectedType)
 
     def testQueryFromSummaryWithParenthesizedType(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (stad)']))
-        self.assertEquals('Groningen', query)
+        self.assertEquals('"Groningen"', query)
         self.assertEquals('hg:Place', expectedType)
 
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (provincie)']))
-        self.assertEquals('Groningen', query)
+        self.assertEquals('"Groningen"', query)
         self.assertEquals('hg:Province', expectedType)
 
     def testQueryFromSummaryWithMoreThenOneParenthesizedType(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (stad)', 'Groningen (provincie)']))
-        self.assertEquals('Groningen, Groningen', query)
+        self.assertEquals('"Groningen", "Groningen"', query)
         self.assertEquals('hg:Place', expectedType)
 
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Groningen (provincie)', 'Groningen (stad)']))
-        self.assertEquals('Groningen, Groningen', query)
+        self.assertEquals('"Groningen", "Groningen"', query)
         self.assertEquals('hg:Place', expectedType)
 
     def testQueryFromSummaryWithParenthesizedQuestionMarkIgnored(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Utrecht (?)']))
-        self.assertEquals('Utrecht', query)
+        self.assertEquals('"Utrecht"', query)
         self.assertEquals(None, expectedType)
 
     def testQueryFromSummarySanitized(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(['Abc (def "ghi']))
-        self.assertEquals('Abc  def  ghi', query)
+        self.assertEquals('"Abc  def  ghi"', query)
         self.assertEquals(None, expectedType)
 
     def testApostrophAndDashKeptInQuery(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(["'s-Gravenhage"]))
-        self.assertEquals("'s-Gravenhage", query)
+        self.assertEquals("\"'s-Gravenhage\"", query)
         self.assertEquals(None, expectedType)
 
     def testTremaKeptInQuery(self):
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(["Groot-Brittanië"]))
-        self.assertEquals("Groot-Brittanië", query)
+        self.assertEquals('"Groot-Brittanië"', query)
         self.assertEquals(None, expectedType)
 
     def testJustNederlandNotQueried(self):
@@ -124,7 +124,7 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
 
         egefs = ErfGeoEnrichmentFromSummary()
         query, expectedType = egefs.queryFromSummary(summary=makeSummary(["Veenendaal", "Nederland"]))
-        self.assertEquals('Veenendaal, Nederland', query)
+        self.assertEquals('"Veenendaal", "Nederland"', query)
         self.assertEquals(None, expectedType)
 
     def testSelectPit(self):
@@ -137,8 +137,8 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
 
     def testAnnotationFromSummary(self):
         queries = []
-        def queryErfGeoApi(query, expectedType=None):
-            queries.append(dict(query=query, expectedType=expectedType))
+        def queryErfGeoApi(query, expectedType=None, exact=None):
+            queries.append(dict(query=query, expectedType=expectedType, exact=exact))
             raise StopIteration(QUERY_RESULTS)
             yield
 
@@ -155,7 +155,7 @@ class ErfGeoEnrichmentFromSummaryTest(SeecrTestCase):
         )
         summary = makeSummary(['straat: Leunseweg', 'dorp: Leunen', 'gemeente: Venray'])
         result = retval(top.any.annotationFromSummary(summary))
-        self.assertEquals([dict(query='Leunseweg, Leunen, Venray', expectedType='hg:Street')], queries)
+        self.assertEquals([dict(query='"Leunseweg", "Leunen", "Venray"', expectedType='hg:Street', exact=True)], queries)
         annotationUri, annotation = result
         self.assertEquals(ERFGEO_ENRICHMENT_PROFILE.uriFor('uri:target'), annotationUri)
         self.assertEquals('nwb/venray-leunseweg', xpathFirst(annotation, '/rdf:RDF/oa:Annotation/oa:hasBody/rdf:Description/dcterms:spatial/hg:PlaceInTime/@rdf:about'))

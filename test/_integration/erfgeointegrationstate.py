@@ -148,8 +148,8 @@ class ErfGeoIntegrationState(IntegrationState):
     def _startMockErfGeoApi(self):
         def makeResponse(request):
             for key, value in [
-                ('Verenigde+Staten', 'soestdijk'),
-                ('Leunseweg%2C+Leunen%2C+Venray', 'leunseweg-leunen-venray'),
+                ('%22Verenigde+Staten%22', 'soestdijk'),
+                ('%22Leunseweg%22%2C+%22Leunen%22%2C+%22Venray%22', 'leunseweg-leunen-venray'),
                 ('GET', 'utrecht')
             ]:
                 if key in request:

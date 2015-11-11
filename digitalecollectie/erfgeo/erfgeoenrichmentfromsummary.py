@@ -70,7 +70,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
     def annotationFromQuery(self, query, expectedType=None, targetUri=None, geoCoordinates=None):
         pit = None
         if query:
-            queryResults = yield self.any.queryErfGeoApi(query=query, expectedType=expectedType)
+            queryResults = yield self.any.queryErfGeoApi(query=query, expectedType=expectedType, exact=True)
             pit = self.selectPit(queryResults, expectedType=expectedType)
         raise StopIteration(self.call.toAnnotation(pit, targetUri, query, geoCoordinates=geoCoordinates))
 
@@ -116,7 +116,9 @@ class ErfGeoEnrichmentFromSummary(Observable):
         query = ', '.join(locationValues)
         query = self._sanitizeQuery(query)
         if query.lower() == 'nederland' and expectedType is None:
-            query = None
+            return None, None
+        if query:
+            query = self._quoteCommaSeparatedParts(query)
         return query, expectedType
 
     def _recognizeLocationKeyValues(self, locationValues):
@@ -156,6 +158,8 @@ class ErfGeoEnrichmentFromSummary(Observable):
     def _sanitizeQuery(self, query):
         return FORBIDDEN_IN_QUERY.sub(' ', query)
 
+    def _quoteCommaSeparatedParts(self, query):
+        return ', '.join('"%s"' % p.strip() for p in query.split(','))
 
 
 PARENTHESIZED = re.compile(r"(.+?)\((.+?)\)(.*)")
