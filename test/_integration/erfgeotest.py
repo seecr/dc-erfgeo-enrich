@@ -34,7 +34,7 @@ from StringIO import StringIO
 from decimal import Decimal
 from urllib import urlencode
 
-from simplejson import loads, dumps
+from simplejson import loads
 
 from lxml.etree import XML, parse
 
@@ -47,6 +47,10 @@ from digitalecollectie.erfgeo.namespaces import xpathFirst, xpath
 
 
 class ErfGeoTest(IntegrationTestCase):
+    def testApiDescription(self):
+        body = self.getPage('/api')
+        self.assertFalse('Traceback' in body, body)
+
     def testOaiIdentify(self):
         header, body = getRequest(self.erfGeoEnrichmentPort, '/oai', {'verb': 'Identify'})
         self.assertEquals("Digitale Collectie ErfGeo enrichments", xpathFirst(body, '/oai:OAI-PMH/oai:Identify/oai:repositoryName/text()'))

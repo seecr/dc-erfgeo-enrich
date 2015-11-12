@@ -159,9 +159,14 @@ def dna(reactor, config, statePath):
                         (BasicHttpHandler(),
                             (PathFilter('/lucene'),
                                 (LuceneRemoteService(reactor=reactor),
-                                    (QueryExpressionToLuceneQuery(unqualifiedTermFields=unqualifiedTermFields, luceneSettings=luceneSettings),
+                                    (FilterMessages(allowed=['fieldnames', 'drilldownFieldnames']),
                                         (lucene,),
                                     ),
+                                    (FilterMessages(allowed=['executeQuery']),
+                                        (QueryExpressionToLuceneQuery(unqualifiedTermFields=unqualifiedTermFields, luceneSettings=luceneSettings),
+                                            (lucene,),
+                                        ),
+                                    )
                                 )
                             ),
                             (PathFilter('/info/version'),
