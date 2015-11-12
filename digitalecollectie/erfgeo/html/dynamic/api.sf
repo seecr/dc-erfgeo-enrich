@@ -32,6 +32,15 @@
 import page
 
 
+def exposeField(field):
+    if field in ['dcterms:spatial.geo:lat', 'dcterms:spatial.geo:long']:
+        return True
+    if field.startswith(UNTOKENIZED_PREFIX):
+        field = field[len(UNTOKENIZED_PREFIX):]
+    if '.' in field or field in ['__all__', '$facets']:
+        return False
+    return True
+
 def main(**kwargs):
     yield page.header()
 
@@ -56,7 +65,7 @@ def main(**kwargs):
 
 <ul>'''
     for field in (yield observable.any.fieldnames(core='erfGeoEnriched')).hits:
-        if not field in ['__all__', '$facets']:
+        if exposeField(field):
             yield '<li>%s</li>\n' % escapeHtml(field)
     yield '''
 </ul>
