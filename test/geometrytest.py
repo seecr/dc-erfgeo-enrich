@@ -41,7 +41,7 @@ from simplejson import loads
 
 from weightless.core import asList
 
-from digitalecollectie.erfgeo.geometry import Geometry, Point, MultiLineString, MultiPolygon
+from digitalecollectie.erfgeo.geometry import Geometry, Point, Polygon, MultiLineString, MultiPolygon
 
 
 class GeometryTest(SeecrTestCase):
@@ -77,6 +77,12 @@ class GeometryTest(SeecrTestCase):
         parsed = loads(json, parse_float=Decimal)
         g = Geometry.fromGeoDict(parsed)
         r = "MultiLineString([[Decimal('5.976364581846588'), Decimal('51.52243586973127')], [Decimal('5.977570822531698'), Decimal('51.521009542433255')], [Decimal('5.977641926636947'), Decimal('51.520937272278')]], [[Decimal('5.977641926636947'), Decimal('51.520937272278')], [Decimal('5.9779252893052455'), Decimal('51.52056729706881')], [Decimal('5.978463420127178'), Decimal('51.519845466966835')]], [[Decimal('5.978810297575312'), Decimal('51.51930414638479')], [Decimal('5.978780974683683'), Decimal('51.519300636494314')], [Decimal('5.978753517554276'), Decimal('51.51929103170512')], [Decimal('5.978725963940384'), Decimal('51.519272905985616')], [Decimal('5.978708102058019'), Decimal('51.51925108169847')], [Decimal('5.9786942063007675'), Decimal('51.51923287779468')], [Decimal('5.978688040122361'), Decimal('51.51920855828437')], [Decimal('5.9786858271487935'), Decimal('51.51918908170666')], [Decimal('5.97869714389736'), Decimal('51.519158579206554')]], [[Decimal('5.978463420127178'), Decimal('51.519845466966835')], [Decimal('5.978689959483037'), Decimal('51.51953869936622')], [Decimal('5.97876059153952'), Decimal('51.5194304755717')], [Decimal('5.978810297575312'), Decimal('51.51930414638479')]], [[Decimal('5.978942199072787'), Decimal('51.51912122045602')], [Decimal('5.97897402190174'), Decimal('51.519135261536135')], [Decimal('5.979001702402638'), Decimal('51.51916313044837')], [Decimal('5.979015786946229'), Decimal('51.51919471773031')], [Decimal('5.979020071895229'), Decimal('51.519223927694654')], [Decimal('5.979014461839677'), Decimal('51.51924343492792')]], [[Decimal('5.978942199072787'), Decimal('51.51912122045602')], [Decimal('5.979226543949531'), Decimal('51.518700018617565')], [Decimal('5.979439134138488'), Decimal('51.51842927555684')], [Decimal('5.979760764946663'), Decimal('51.517681570604')], [Decimal('5.979788757821533'), Decimal('51.517618506703975')]])"
+        self.assertEquals(r, repr(g))
+        self.assertEquals(eval(r), g)
+
+    def testParsePolygonWkt(self):
+        g = Geometry.parseWkt("POLYGON ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))")
+        r = 'Polygon([[10, 10], [20, 20], [10, 40]], [[40, 40], [30, 30], [40, 20], [30, 10]])'
         self.assertEquals(r, repr(g))
         self.assertEquals(eval(r), g)
 
@@ -128,4 +134,3 @@ class GeometryTest(SeecrTestCase):
 
         g = MultiPolygon([[[40, 40], [20, 45], [45, 30], [40, 40]]], [[[20, 35], [10, 30], [10, 10], [30, 5], [45, 20], [20, 35]], [[30, 20], [20, 15], [20, 25], [30, 20]]])
         self.assertEquals([(40, 40), (20, 45), (45, 30), (40, 40), (20, 35), (10, 30), (10, 10), (30, 5), (45, 20), (20, 35), (30, 20), (20, 15), (20, 25), (30, 20)], asList(g.pointCoordinates()))
-

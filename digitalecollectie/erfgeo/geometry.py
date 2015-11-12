@@ -92,6 +92,39 @@ class Point(Geometry):
 Geometry._registerGeometryType(Point)
 
 
+class LineString(Geometry):
+    wktName = 'LINESTRING'
+    def asWkt(self):
+        return self.wktName + "(%s)" % ', '.join(
+            ' '.join(str(c) for c in point)
+            for point in self._coordinates
+        )
+Geometry._registerGeometryType(LineString)
+
+
+class Polygon(Geometry):
+    wktName = 'POLYGON'
+    def asWkt(self):
+        return self.wktName + '(%s)' % ', '.join(
+            "(%s)" % ', '.join(
+                ' '.join(str(c) for c in point)
+                for point in lineString
+            )
+            for lineString in self._coordinates
+        )
+Geometry._registerGeometryType(Polygon)
+
+
+class MultiPoint(Geometry):
+    wktName = 'MULTIPOINT'
+    def asWkt(self):
+        return self.wktName + "(%s)" % ', '.join(
+            ' '.join(str(c) for c in point)
+            for point in self._coordinates
+        )
+Geometry._registerGeometryType(MultiPoint)
+
+
 class MultiLineString(Geometry):
     wktName = 'MULTILINESTRING'
     def asWkt(self):
@@ -118,5 +151,4 @@ class MultiPolygon(Geometry):
             )
             for polygon in self._coordinates
         )
-        from sys import stdout; stdout.flush()
 Geometry._registerGeometryType(MultiPolygon)
