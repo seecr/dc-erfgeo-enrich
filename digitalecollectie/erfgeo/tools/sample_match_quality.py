@@ -79,7 +79,9 @@ def splitLocations(record):
         if isinstance(s, basestring):
             originalLocations.append(s)
             continue
-        uri = s['@id']
+        uri = s.get('@id')
+        if not uri:
+            continue
         if '/gtaa/' in uri:
             originalLocations.append((uri, s['skos:prefLabel']))
             continue
