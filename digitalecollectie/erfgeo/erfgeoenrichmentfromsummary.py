@@ -101,13 +101,16 @@ class ErfGeoEnrichmentFromSummary(Observable):
             node = xpathFirst(summary, '*[@rdf:about="%s"]')
             if not node is None:
                 nodes.append(node)
-        for node in xpath(annotationBody, 'dcterms:spatial/rdf:Description'):
+        for node in xpath(annotationBody, 'dcterms:spatial/*'):
             nodes.append(node)
         for node in nodes:
             geoLat = xpathFirst(node, 'geo:lat/text()')
             geoLong = xpathFirst(node, 'geo:long/text()')
             if geoLat and geoLong:
                 return (geoLat, geoLong)
+            asWkt = xpathFirst(node, 'geos:hasGeometry/*/geos:asWKT/text()')
+            if not asWkt is None:
+                return asWkt
         return None
 
     def _queryFromCoverageValues(self, coverageValues):
