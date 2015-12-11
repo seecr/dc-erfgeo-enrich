@@ -35,7 +35,7 @@ import re
 from meresco.core import Observable
 
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
-from digitalecollectie.erfgeo.geometry import Point, MultiLineString, MultiPolygon
+from digitalecollectie.erfgeo.geometry import Point, MultiLineString, MultiPolygon, Geometry
 from digitalecollectie.erfgeo.namespaces import xpath, xpathFirst
 from digitalecollectie.erfgeo.utils import first, indexOf
 
@@ -110,7 +110,7 @@ class ErfGeoEnrichmentFromSummary(Observable):
                 return (geoLat, geoLong)
             asWkt = xpathFirst(node, 'geos:hasGeometry/*/geos:asWKT/text()')
             if not asWkt is None:
-                return asWkt
+                return Geometry.parseWkt(asWkt).pointCoordinates().next()
         return None
 
     def _queryFromCoverageValues(self, coverageValues):
