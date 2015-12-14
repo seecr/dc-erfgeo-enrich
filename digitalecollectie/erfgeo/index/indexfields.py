@@ -89,7 +89,7 @@ class IndexFields(object):
         return fieldname and not fieldname in UNWANTED_FIELDS and not postfix in UNWANTED_POSTFIXES
 
     def _evaluate(self, fieldname, value):
-        if fieldname == 'dcterms:spatial.geos:hasGeometry.geos:asWKT':
+        if fieldname.startswith('dcterms:spatial.') and fieldname.endswith('.geos:asWKT'):
             geometry = Geometry.parseWkt(value)
             for (geoLong, geoLat) in geometry.pointCoordinates():
                 yield 'dcterms:spatial.geo:long', geoLong
