@@ -36,10 +36,10 @@ from lxml.etree import tostring
 
 from seecr.test import SeecrTestCase, CallTrace
 
-from weightless.core import compose
+from weightless.core import consume
 
 from digitalecollectie.erfgeo.oaisetsharvester import OaiSetsHarvester
-from digitalecollectie.erfgeo.setsselection import SetsSelection
+from digitalecollectie.erfgeo.setsselection import SetsSelection, WILDCARD
 
 from callstackdicttest import CallStackDictMonitor
 
@@ -72,7 +72,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
         )
         self.assertEquals([], reactorStub.calledMethods)
-        list(compose(oaiSetsHarvester.observer_init()))
+        consume(oaiSetsHarvester.observer_init())
         self.assertEquals(
             set(['kb', 'beng', 'nationaal_archief', 'open_beelden:beeldengeluid']),
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
@@ -80,7 +80,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         self.assertEquals(4 * ['addTimer'], [m.name for m in reactorStub.calledMethods])
 
         bengPeriodicDownload = oaiSetsHarvester._periodicDownloaders['beng']
-        list(compose(bengPeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE)))
+        consume(bengPeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE))
 
         self.assertEquals(['observer_init', 'add', 'add'], [m.name for m in observer.calledMethods])
         addCalls = observer.calledMethods[1:]
@@ -124,7 +124,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         self.assertEquals([], reactorStub.calledMethods)
         self.assertEquals([], observer.calledMethods)
 
-        list(compose(oaiSetsHarvester.observer_init()))
+        consume(oaiSetsHarvester.observer_init())
         self.assertEquals([], reactorStub.calledMethods)
         self.assertEquals(['observer_init'], [m.name for m in observer.calledMethods])
 
@@ -137,8 +137,38 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         self.assertEquals(['addTimer', 'addTimer'], [m.name for m in reactorStub.calledMethods])
 
         bengPeriodicDownload = oaiSetsHarvester._periodicDownloaders['beng']
-        list(compose(bengPeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE)))
+        consume(bengPeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE))
 
+        self.assertEquals(['observer_init', 'addToSelection', 'addToSelection', 'add', 'add'], [m.name for m in observer.calledMethods])
+
+    def testAddSetHarvesterWildcard(self):
+        remove(self._setsSelectionFilepath)
+        setsSelection = SetsSelection(self._setsSelectionFilepath)
+
+        reactorStub = CallTrace('reactor')
+        oaiSetsHarvester = OaiSetsHarvester(
+            reactor=reactorStub,
+            hostName='localhost',
+            portNumber=80,
+            path='/oai',
+            interval=0.1,
+            workingDirectory=join(self.tempdir, 'harvest'),
+        )
+        oaiSetsHarvester.addObserver(setsSelection)
+        observer = CallTrace('observer', emptyGeneratorMethods=['add'])
+        oaiSetsHarvester.addObserver(observer)
+        consume(oaiSetsHarvester.observer_init())
+
+        oaiSetsHarvester.addSetHarvest(WILDCARD)
+        oaiSetsHarvester.addSetHarvest('open_beelden:beeldengeluid')
+        self.assertEquals(
+            set([WILDCARD]),
+            set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
+        )
+        self.assertEquals(['addTimer'], [m.name for m in reactorStub.calledMethods])
+
+        thePeriodicDownload = oaiSetsHarvester._periodicDownloaders[WILDCARD]
+        consume(thePeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE))
         self.assertEquals(['observer_init', 'addToSelection', 'addToSelection', 'add', 'add'], [m.name for m in observer.calledMethods])
 
     def testAddSetHarvesterPersistent(self):
@@ -152,7 +182,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
             workingDirectory=join(self.tempdir, 'harvest'),
         )
         oaiSetsHarvester.addObserver(self._setsSelection)
-        list(compose(oaiSetsHarvester.observer_init()))
+        consume(oaiSetsHarvester.observer_init())
 
         oaiSetsHarvester.addSetHarvest('rce')
         self.assertEquals(
@@ -179,7 +209,7 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         )
         oaiSetsHarvester.addObserver(SetsSelection(self._setsSelectionFilepath))
         self.assertEquals([], [m.name for m in reactorStub.calledMethods])
-        list(compose(oaiSetsHarvester.observer_init()))
+        consume(oaiSetsHarvester.observer_init())
         self.assertEquals(
             set(['kb', 'open_beelden:beeldengeluid', 'rce', 'beng', 'nationaal_archief']),
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])

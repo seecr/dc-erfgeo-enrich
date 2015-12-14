@@ -50,13 +50,15 @@ class SetsSelection(object):
     def addToSelection(self, setSpec=WILDCARD):
         if setSpec == WILDCARD:
             self._selection = [WILDCARD]
+        elif WILDCARD in self._selection:
+            return
         elif setSpec not in self._selection:
             self._selection.append(setSpec)
             self._selection = sorted(self._selection)
         self._save()
 
     def isSelected(self, setSpec):
-        return setSpec in self._selection
+        return (setSpec in self._selection) or (WILDCARD in self._selection)
 
     def _read(self):
         self._selection = []

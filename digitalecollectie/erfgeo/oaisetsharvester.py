@@ -31,14 +31,12 @@
 
 from os import makedirs
 from os.path import join, isdir
-from urllib import quote
+
+from weightless.core import be
 
 from meresco.core import Transparent
 from meresco.components import PeriodicDownload, Schedule, XmlParseLxml
-from meresco.oai import OaiDownloadProcessor
-from weightless.core import be
-
-from meresco.oai import UpdateAdapterFromOaiDownloadProcessor
+from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProcessor
 
 from digitalecollectie.erfgeo.callstackdict import CallStackDict
 from digitalecollectie.erfgeo.setsselection import WILDCARD
@@ -88,16 +86,20 @@ class OaiSetsHarvester(InsideOutObservable):
         self._addSetHarvest(setSpec=setSpec)
 
     def _addSetHarvest(self, setSpec):
-        setWorkingDirectory = join(self._workingDirectory, setSpec)
+        if setSpec == WILDCARD:
+            setSpec = None
+        if WILDCARD in self._periodicDownloaders.keys():
+            return
+        setWorkingDirectory = join(self._workingDirectory, setSpec or '')
         isdir(setWorkingDirectory) or makedirs(setWorkingDirectory)
-        self._periodicDownloaders[setSpec] = periodicDownload = PeriodicDownload(
+        self._periodicDownloaders[setSpec or WILDCARD] = periodicDownload = PeriodicDownload(
             reactor=self._reactor,
             host=self._hostName,
             port=self._portNumber,
             schedule=Schedule(period=self._interval)
         )
         setHarvestTree = be(
-            (Transparent(name=setSpec),
+            (Transparent(name=setSpec or WILDCARD),
                 (periodicDownload,
                     (XmlParseLxml(fromKwarg="data", toKwarg="lxmlNode"),
                         (OaiDownloadProcessor(

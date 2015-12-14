@@ -33,7 +33,7 @@ from os.path import join
 
 from seecr.test import SeecrTestCase
 
-from digitalecollectie.erfgeo.setsselection import SetsSelection
+from digitalecollectie.erfgeo.setsselection import SetsSelection, WILDCARD
 
 
 class SetsSelectionTest(SeecrTestCase):
@@ -71,3 +71,12 @@ class SetsSelectionTest(SeecrTestCase):
   "open_beelden:beeldengeluid",
   "open_beelden:openimages"
 ]""", open(selectionPath).read())
+
+    def testWildcard(self):
+        selectionPath = join(self.tempdir, 'subdir', 'repository_sets_selection.json')
+        setsSelection = SetsSelection(selectionPath)
+        self.assertFalse(setsSelection.isSelected('abc'))
+        self.assertEquals([], list(setsSelection.selectedSetSpecs()))
+        setsSelection.addToSelection(WILDCARD)
+        self.assertEquals([WILDCARD], list(setsSelection.selectedSetSpecs()))
+        self.assertTrue(setsSelection.isSelected('abc'))
