@@ -51,7 +51,7 @@ from digitalecollectie.erfgeo.geometry import Geometry
 
 
 class ErfGeoQuery(Observable):
-    def __init__(self, searchApiBaseUrl='https://api.erfgeo.nl/search', **kwargs):
+    def __init__(self, searchApiBaseUrl='https://api.histograph.io/search', **kwargs):
         Observable.__init__(self, **kwargs)
         parsedUrl = parseAbsoluteUrl(searchApiBaseUrl)
         self._host = parsedUrl.host
@@ -65,7 +65,9 @@ class ErfGeoQuery(Observable):
             queryDict['type'] = expectedType
         if not exact is None:
             queryDict['exact'] = 'true' if exact else 'false'
-        response = yield self.any.httprequest(host=self._host, port=self._port, request=self._path + '?' + urlencode(queryDict), ssl=self._ssl)
+        request = self._path + '?' + urlencode(queryDict)
+        print "requesting http%s//:%s:%s/%s" % (('s' if self._ssl else ''), self._host, self._port, request)
+        response = yield self.any.httprequest(host=self._host, port=self._port, request=request, ssl=self._ssl)
         header, body = response.split('\r\n\r\n')
         results = self.parseQueryResponse(body)
         raise StopIteration(results)
@@ -78,6 +80,9 @@ class ErfGeoQuery(Observable):
             for feature in parsed['features']:
                 geometries = feature['geometry']['geometries']
                 properties = feature['properties']
+                hgType = properties.get('type')
+                if not hgType:
+                    continue
                 pits = []
                 for pit in properties['pits']:
                     pit['@base'] = base
@@ -85,7 +90,7 @@ class ErfGeoQuery(Observable):
                     geometryIndex = pit['geometryIndex']
                     pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
                     pits.append(pit)
-                results.append((properties['type'], pits))
+                results.append((hgType, pits))
             return results
         except:
             # print_exc()
