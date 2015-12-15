@@ -66,7 +66,7 @@ class ErfGeoQuery(Observable):
         if not exact is None:
             queryDict['exact'] = 'true' if exact else 'false'
         request = self._path + '?' + urlencode(queryDict)
-        print "requesting http%s//:%s:%s/%s" % (('s' if self._ssl else ''), self._host, self._port, request)
+        print "requesting http%s://%s:%s%s" % (('s' if self._ssl else ''), self._host, self._port, request)
         response = yield self.any.httprequest(host=self._host, port=self._port, request=request, ssl=self._ssl)
         header, body = response.split('\r\n\r\n')
         results = self.parseQueryResponse(body)
