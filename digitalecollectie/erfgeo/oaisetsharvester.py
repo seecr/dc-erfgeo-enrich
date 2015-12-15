@@ -88,8 +88,6 @@ class OaiSetsHarvester(InsideOutObservable):
     def _addSetHarvest(self, setSpec):
         if setSpec == WILDCARD:
             setSpec = None
-        if WILDCARD in self._periodicDownloaders.keys():
-            return
         setWorkingDirectory = join(self._workingDirectory, setSpec or '')
         isdir(setWorkingDirectory) or makedirs(setWorkingDirectory)
         self._periodicDownloaders[setSpec or WILDCARD] = periodicDownload = PeriodicDownload(

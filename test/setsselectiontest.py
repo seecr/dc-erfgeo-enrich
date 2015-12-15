@@ -80,3 +80,14 @@ class SetsSelectionTest(SeecrTestCase):
         setsSelection.addToSelection(WILDCARD)
         self.assertEquals([WILDCARD], list(setsSelection.selectedSetSpecs()))
         self.assertTrue(setsSelection.isSelected('abc'))
+
+    def testWildcardKeepsSpecificSelectionsForPriorityHarvesting(self):
+        selectionPath = join(self.tempdir, 'subdir', 'repository_sets_selection.json')
+        setsSelection = SetsSelection(selectionPath)
+        self.assertFalse(setsSelection.isSelected('abc'))
+        setsSelection.addToSelection('abc')
+        setsSelection.addToSelection(WILDCARD)
+        setsSelection.addToSelection('def')
+        self.assertEquals([WILDCARD, 'abc', 'def'], list(setsSelection.selectedSetSpecs()))
+        self.assertTrue(setsSelection.isSelected('abc'))
+        self.assertTrue(setsSelection.isSelected('xyz'))

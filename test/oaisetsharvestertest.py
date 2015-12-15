@@ -162,10 +162,10 @@ class OaiSetsHarvesterTest(SeecrTestCase):
         oaiSetsHarvester.addSetHarvest(WILDCARD)
         oaiSetsHarvester.addSetHarvest('open_beelden:beeldengeluid')
         self.assertEquals(
-            set([WILDCARD]),
+            set([WILDCARD, 'open_beelden:beeldengeluid']),
             set([o._name for o in oaiSetsHarvester.internalObserverTreeRoot._observers])
         )
-        self.assertEquals(['addTimer'], [m.name for m in reactorStub.calledMethods])
+        self.assertEquals(['addTimer', 'addTimer'], [m.name for m in reactorStub.calledMethods])
 
         thePeriodicDownload = oaiSetsHarvester._periodicDownloaders[WILDCARD]
         consume(thePeriodicDownload.all.handle(data=LISTRECORDS_RESPONSE))

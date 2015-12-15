@@ -48,11 +48,7 @@ class SetsSelection(object):
             yield setSpec
 
     def addToSelection(self, setSpec=WILDCARD):
-        if setSpec == WILDCARD:
-            self._selection = [WILDCARD]
-        elif WILDCARD in self._selection:
-            return
-        elif setSpec not in self._selection:
+        if setSpec not in self._selection:
             self._selection.append(setSpec)
             self._selection = sorted(self._selection)
         self._save()
