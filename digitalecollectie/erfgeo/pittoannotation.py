@@ -9,9 +9,9 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2015 Stichting DEN http://www.den.nl
+# Copyright (C) 2015-2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2016 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
 #
@@ -38,7 +38,7 @@ from lxml.etree import XML
 from weightless.core import asString
 from meresco.core import Observable
 
-from digitalecollectie.erfgeo.utils import getitem
+from digitalecollectie.erfgeo.utils import getitem, uriWithBase
 from digitalecollectie.erfgeo.namespaces import namespaces, curieToUri
 from digitalecollectie.erfgeo.uris import uris
 from digitalecollectie.erfgeo.annotationprofiles import ERFGEO_ENRICHMENT_PROFILE
@@ -107,7 +107,7 @@ class PitToAnnotation(Observable):
             yield '    <owl:sameAs rdf:resource="%s"/>\n' % xmlEscape(owlSameAs)
         sameHgConceptRelations = getitem(pit.get('relations'), 'hg:sameHgConcept', [])
         for sameHgConcept in sameHgConceptRelations:
-            yield self._renderSameHgConcept(pit['@base'] + sameHgConcept['@id'])
+            yield self._renderSameHgConcept(uriWithBase(sameHgConcept['@id'], pit['@base']))
         hasBeginning = pit.get('hasBeginning')
         if hasBeginning:
             yield '<hg:hasBeginning>%s</hg:hasBeginning>\n' % hasBeginning
