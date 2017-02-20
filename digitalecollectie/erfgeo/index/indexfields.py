@@ -30,6 +30,8 @@
 #
 ## end license ##
 
+from weightless.core import compose, Yield
+
 from meresco.lucene import DrilldownField, SORTED_PREFIX, UNTOKENIZED_PREFIX
 
 from digitalecollectie.erfgeo.index.constants import ALL_FIELD
@@ -59,10 +61,25 @@ class IndexFields(object):
         'untokenized.id',
     ]
 
-    def __init__(self, observable):
+    def __init__(self, observable, _):
         self._observable = observable
+        self._fieldnames = set()
 
     def fieldsFor(self, fieldname, value):
+        fields = []
+        for o in compose(self._fieldsFor(fieldname, value)):
+            if callable(o) or o is Yield:
+                yield o
+                continue
+            f, v = o
+            if f.startswith(SORTED_PREFIX) and f in self._fieldnames:
+                continue
+            fields.append((f, v))
+            self._fieldnames.add(f)
+        raise StopIteration(fields)
+        yield
+
+    def _fieldsFor(self, fieldname, value):
         fieldname = self._rename(fieldname)
         for fieldname, value in self._evaluate(fieldname, value):
             if self._keep(fieldname):
@@ -99,8 +116,8 @@ class IndexFields(object):
         if fieldname == 'dcterms:spatial.uri':
             if value.startswith('geo:'):
                 geoLat, _, geoLong = value[len('geo:'):].partition(',')
-                yield 'dcterms:spatial.geo:long', geoLong
-                yield 'dcterms:spatial.geo:lat', geoLat
+                yield 'dcterms:spatial.geo:long', float(geoLong)
+                yield 'dcterms:spatial.geo:lat', float(geoLat)
             return
         if fieldname in ['dc:date', 'dcterms:created']:
             for year in parseYears(value):

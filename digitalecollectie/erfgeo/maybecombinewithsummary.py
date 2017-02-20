@@ -78,6 +78,10 @@ class MaybeCombineWithSummary(Observable):
     def yieldRecord(self, identifier, partname):
         yield self.getData(identifier=identifier, name=partname)
 
+    def retrieveData(self, identifier, name):
+        raise StopIteration(self.getData(identifier=identifier, name=name))
+        yield
+
     def _combine(self, erfgeoEnrichment, summary):
         yield '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n'
         for data in [summary, erfgeoEnrichment]:

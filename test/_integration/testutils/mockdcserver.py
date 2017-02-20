@@ -86,7 +86,11 @@ def startServer(port, dataDir, dataDirFirst=None, dataDirLast=None, batchSize=No
     storage = DataStorage()
     try:
         reactor = Reactor()
-        oaiPmh = prepareOaiPmh(dataDirs=[d for d in [dataDirFirst, dataDir, dataDirLast] if d], tempDir=tempDir, storage=storage, batchSize=batchSize)
+        oaiPmh = prepareOaiPmh(
+            dataDirs=[d for d in [dataDirFirst, dataDir, dataDirLast] if d],
+            tempDir=tempDir,
+            storage=storage,
+            batchSize=batchSize)
         server = be(dna(reactor, port, oaiPmh, storage))
         print 'Ready to rumble the mock plein server at', port
         consume(server.once.observer_init())

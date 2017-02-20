@@ -109,8 +109,10 @@ class DataStorage(object):
     def addFile(self, filename, filepath):
         self.filepathFor[filename] = filepath
 
-    def getData(self, identifier, name):
-        yield open(self.filepathFor.get('%s.%s' % (identifier, name))).read()
+    def retrieveData(self, identifier, name):
+        data = open(self.filepathFor.get('%s.%s' % (identifier, name))).read()
+        raise StopIteration(data)
+        yield
 
 
 def dna(reactor, portNumber, oaiPmh):

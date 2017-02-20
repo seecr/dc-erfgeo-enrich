@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.6
+#!/usr/bin/env python
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -9,9 +9,9 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015-2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2015-2016 Stichting DEN http://www.den.nl
+# Copyright (C) 2015, 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015, 2017 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015, 2016 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
 #
@@ -54,7 +54,6 @@ from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
 from unprefixidentifiertest import UnprefixIdentifierTest
 from geometrytest import GeometryTest
 
-from index.fieldslisttolucenedocumenttest import FieldsListToLuceneDocumentTest
 from index.lxmltofieldslisttest import LxmlToFieldsListTest
 from index.dateparsetest import DateParseTest
 

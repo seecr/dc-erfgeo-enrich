@@ -41,7 +41,7 @@ from weightless.io import Reactor
 
 from meresco.core import Observable, Transparent
 from meresco.core.processtools import setSignalHandlers, registerShutdownHandler
-from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact, XmlXPath, RewritePartname
+from meresco.components import readConfig, FilterMessages, XmlPrintLxml, lxmltostring, CqlMultiSearchClauseConversion, RenameFieldForExact, XmlXPath, RewritePartname, RetrieveToGetDataAdapter
 from meresco.components.drilldown import TranslateDrilldownFieldnames, SRUTermDrilldown
 from meresco.components.sru import SruParser, SruHandler
 from meresco.components.http.utils import redirectHttp
@@ -194,7 +194,11 @@ def dna(reactor, config, statePath, out=stdout):
     ))
     oaiJazz.updateMetadataFormat(*ERFGEO_ANNOTATION_METADATA_FORMAT)
     oaiJazz.updateMetadataFormat(*COMBINED_ANNOTATION_METADATA_FORMAT)
-    erfGeoEnrichmentStorage = MultiSequentialStorage(join(statePath, 'storage'))
+    erfGeoEnrichmentStorage = be(
+        (RetrieveToGetDataAdapter(),
+            (MultiSequentialStorage(join(statePath, 'storage')),)
+        )
+    )
 
     digitaleCollectieOaiPath = '/oai'
     if digitaleCollectieApiKey:

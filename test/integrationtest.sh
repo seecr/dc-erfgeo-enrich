@@ -33,4 +33,4 @@
 export LANG=en_US.UTF-8
 export PYTHONPATH=.:$PYTHONPATH
 export GC_SUPPRESS_FORCE_COLLECT=1
-python2.6 _integrationtest.py "$@"
+python _integrationtest.py "$@"

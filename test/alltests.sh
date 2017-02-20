@@ -33,5 +33,5 @@
 
 export LANG=en_US.UTF-8
 export PYTHONPATH=.:$PYTHONPATH
-python2.6 _alltests.py "$@"
+python _alltests.py "$@"
 
