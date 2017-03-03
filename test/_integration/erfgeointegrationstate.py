@@ -71,8 +71,6 @@ class ErfGeoIntegrationState(IntegrationState):
         self.erfGeoEnrichmentIndexLocalStatePath = join(self.integrationTempdir, 'erfGeoEnrichmentIndexLocal')
         self.lucenePort = PortNumberGenerator.next()
         self.luceneDir = join(self.integrationTempdir, 'erfGeoEnrichmentIndex-lucene')
-        self.numeratePort = PortNumberGenerator.next()
-        self.numerateDir = join(self.integrationTempdir, 'erfGeoEnrichmentIndex-numerate')
 
         erfGeoRepositorySetsSelectionFile = join(self.erfGeoEnrichmentLocalStatePath, 'erfgeo_dc_sets.json')
         if not self.fastMode:
@@ -96,7 +94,6 @@ class ErfGeoIntegrationState(IntegrationState):
         setConfig(config, 'erfgeoEnrich.portNumber', self.erfGeoEnrichmentPort)
         setConfig(config, 'erfgeoEnrich.index.portNumber', self.erfGeoEnrichmentIndexPort)
         setConfig(config, 'erfgeoEnrich.index.lucenePortNumber', self.lucenePort)
-        setConfig(config, 'erfgeoEnrich.index.numeratePortNumber', self.numeratePort)
         setConfig(config, 'digitaleCollectie.host', 'localhost')
         setConfig(config, 'digitaleCollectie.port', self.digitaleCollectiePort)
         setConfig(config, 'erfgeo.searchApiBaseUrl', 'http://localhost:%s' % self.erfGeoApiPort)
@@ -120,7 +117,6 @@ class ErfGeoIntegrationState(IntegrationState):
         self._startMockErfGeoApi()
         self._startMockDigitaleCollectie()
         self._startErfGeoEnrichmentServer()
-        self.startNumerateServer()
         self.startLuceneServer()
         self._startErfGeoEnrichmentIndexServer()
         self._createDatabase()
@@ -145,16 +141,6 @@ class ErfGeoIntegrationState(IntegrationState):
             serviceReadyUrl='http://localhost:%s/info/version' % self.erfGeoEnrichmentPort,
             stateDir=self.erfGeoEnrichmentLocalStatePath,
             configFile=self.configFile)
-
-    def startNumerateServer(self):
-        self._startServer(
-            serviceName='numerate',
-            executable=self.binPath('start-uri-numerate-server'),
-            serviceReadyUrl='http://localhost:%s/ready' % self.numeratePort,
-            port=self.numeratePort,
-            stateDir=self.numerateDir,
-            waitForStart=True,
-            args=['-Xmx1G'])
 
     def startLuceneServer(self):
         self._startServer(

@@ -123,7 +123,6 @@ def createErfGeoEnrichmentPeriodicDownloadHelix(reactor, lucene, config, statePa
 def dna(reactor, config, statePath):
     portNumber = int(config['erfgeoEnrich.index.portNumber'])
     lucenePortNumber = int(config['erfgeoEnrich.index.lucenePortNumber'])
-    numeratePortNumber = int(config['erfgeoEnrich.index.numeratePortNumber'])
 
     indexCommitTimeout = config.get('debug.global.index.commitTimeout', 10)
 
@@ -146,7 +145,7 @@ def dna(reactor, config, statePath):
         )
     )
 
-    termNumerate = be((TermNumerate(host='localhost', port=numeratePortNumber),
+    termNumerate = be((TermNumerate(host='localhost', port=lucenePortNumber),
         (http11RequestAdapter,)
     ))
 
