@@ -73,11 +73,14 @@ class LxmlToFieldsListTest(SeecrTestCase):
                 ('dcterms:spatial.rdfs:label', 'Museum Boerhaave'),
                 ('dcterms:spatial.geo:lat', '52.1613636'),
                 ('dcterms:spatial.geo:long', '4.4891784'),
-                ('dcterms:spatial.vcard:region', 'Leiden')
+                ('dcterms:spatial.vcard:region', 'Leiden'),
+                ('schema:image.uri', 'http://1.bp.blogspot.com/-vmAlQNDcgkw/T1x3l0r4NmI/AAAAAAAAAG8/9f2f4ZKobHU/s1600/Blog10.gif'),
+                ('schema:image.schema:width', '262'),
+                ('schema:image.schema:height', '150')
             ], fields)
 
 
-SUMMARY_ANNOTATION = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+SUMMARY_ANNOTATION = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:schema="http://schema.org/">
 <oa:Annotation xmlns:oa="http://www.w3.org/ns/oa#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" rdf:about="http://data.bibliotheek.nl/nbc/summary#a7c42194d70564da62e2f184a9c488298fd1493d">
     <oa:annotatedBy rdf:resource="http://data.bibliotheek.nl/id/bnl"/>
     <oa:motivatedBy rdf:resource="http://data.bibliotheek.nl/ns/nbc/oa#summarizing"/>
@@ -109,7 +112,12 @@ SUMMARY_ANNOTATION = """<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syn
             <vcard:region>Leiden</vcard:region>
           </rdf:Description>
         </dcterms:spatial>
+        <schema:image rdf:resource="http://1.bp.blogspot.com/-vmAlQNDcgkw/T1x3l0r4NmI/AAAAAAAAAG8/9f2f4ZKobHU/s1600/Blog10.gif"/>
       </rdf:Description>
     </oa:hasBody>
   </oa:Annotation>
+  <rdf:Description rdf:about="http://1.bp.blogspot.com/-vmAlQNDcgkw/T1x3l0r4NmI/AAAAAAAAAG8/9f2f4ZKobHU/s1600/Blog10.gif">
+    <schema:width>262</schema:width>
+    <schema:height>150</schema:height>
+  </rdf:Description>
 </rdf:RDF>""" % namespaces

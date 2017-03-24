@@ -76,15 +76,17 @@ class IndexFields(object):
                 continue
             fields.append((f, v))
             self._fieldnames.add(f)
+        s = [(f, v) for (f, v) in fields if not f.startswith('dcterms:spatial') or f.startswith('schema') or (f.startswith('dcterms:spatial.') and isinstance(v, basestring))]
+        if s:
+            print 'fields', s
+            import sys; sys.stdout.flush()
         raise StopIteration(fields)
         yield
 
     def _fieldsFor(self, fieldname, value):
         fieldname = self._rename(fieldname)
-        for fieldname, value in self._evaluate(fieldname, value):
+        for fieldname, value in compose(self._evaluate(fieldname, value)):
             if self._keep(fieldname):
-                # print 'fieldname, value', fieldname, value
-                # from sys import stdout; stdout.flush()
                 yield fieldname, value
                 if self._inAll(fieldname):
                     yield ALL_FIELD, value
@@ -100,6 +102,9 @@ class IndexFields(object):
         base, postfix = splitLastSegment(fieldname)
         if postfix in LABEL_TAGS:
             fieldname = base
+        for name in FIELDNAMES_AS_POSTFIX:
+            if fieldname.endswith('.' + name):
+                fieldname = postfix
         return fieldname
 
     def _keep(self, fieldname):
@@ -107,18 +112,26 @@ class IndexFields(object):
         return fieldname and not fieldname in UNWANTED_FIELDS and not postfix in UNWANTED_POSTFIXES
 
     def _evaluate(self, fieldname, value):
-        if fieldname.startswith('dcterms:spatial.') and fieldname.endswith('.geos:asWKT'):
-            geometry = Geometry.parseWkt(value)
-            for (geoLong, geoLat) in geometry.pointCoordinates():
-                yield 'dcterms:spatial.geo:long', geoLong
-                yield 'dcterms:spatial.geo:lat', geoLat
-            return
-        if fieldname == 'dcterms:spatial.uri':
-            if value.startswith('geo:'):
-                geoLat, _, geoLong = value[len('geo:'):].partition(',')
-                yield 'dcterms:spatial.geo:long', float(geoLong)
-                yield 'dcterms:spatial.geo:lat', float(geoLat)
-            return
+        if fieldname in INT_FIELDS:
+            try:
+                value = int(value)
+            except ValueError:
+                return
+        if fieldname.startswith('dcterms:spatial.'):
+            if fieldname.endswith('.geos:asWKT'):
+                geometry = Geometry.parseWkt(value)
+                for (geoLong, geoLat) in geometry.pointCoordinates():
+                    yield 'dcterms:spatial.geo:long', geoLong
+                    yield 'dcterms:spatial.geo:lat', geoLat
+                return
+            if fieldname == 'dcterms:spatial.uri':
+                if value.startswith('geo:'):
+                    geoLat, _, geoLong = value[len('geo:'):].partition(',')
+                    yield 'dcterms:spatial.geo:long', float(geoLong)
+                    yield 'dcterms:spatial.geo:lat', float(geoLat)
+                return
+            if fieldname in {'dcterms:spatial.geo:long', 'dcterms:spatial.geo:lat'}:
+                value = float(value)
         if fieldname in ['dc:date', 'dcterms:created']:
             for year in parseYears(value):
                 yield 'dc:date.year', str(year)
@@ -158,10 +171,17 @@ PREFIX_RENAMES = [
     ('dcterms:spatial.hg:PlaceInTime', 'dcterms:spatial'),
     ('oa:hasTarget.uri', 'id')
 ]
+FIELDNAMES_AS_POSTFIX = ['schema:width', 'schema:height']
 UNWANTED_FIELDS = [
     #'oa:hasTarget.uri',
     'oa:motivatedBy.uri',
     'dcterms:spatial.vcard:region',
 ]
-UNWANTED_POSTFIXES = set(['uri'])  # Not so sure
-EXCLUDED_FROM_ALL = set(['dcterms:spatial.geo:long', 'dcterms:spatial.geo:lat'])
+UNWANTED_POSTFIXES = {'uri'}
+EXCLUDED_FROM_ALL = {
+    'dcterms:spatial.geo:long',
+    'dcterms:spatial.geo:lat',
+    'schema:width',
+    'schema:height'
+}
+INT_FIELDS = {'schema:width', 'schema:height'}

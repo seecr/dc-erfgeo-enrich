@@ -114,6 +114,11 @@ class ErfGeoTest(IntegrationTestCase):
         self.assertSruQuery(1, 'dcterms:spatial=Leunseweg')
         self.assertSruQuery(1, '__id__ exact "http://data.digitalecollectie.nl/annotation/erfGeoEnrichment#TklPRF9CQldPMjpuaW9kOjMzNjY0NTk="')
         self.assertSruQuery(1, 'id exact "NIOD_BBWO2:niod:3366459"')
+        self.assertSruQuery(1, 'schema:width > 10')
+        self.assertSruQuery(0, 'schema:width > 100')
+        self.assertSruQuery(1, 'schema:height > 10')
+        self.assertSruQuery(1, 'schema:height > 100')
+        self.assertSruQuery(0, 'schema:height > 200')
 
     def testSruGeoRangesHits(self):
         self.assertSruQuery(set(['geluidVanNl:geluid_van_nederland:47954146']), 'dcterms:spatial.geo:long<5')

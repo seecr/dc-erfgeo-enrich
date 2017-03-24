@@ -30,6 +30,8 @@
 #
 ## end license ##
 
+from traceback import print_exc
+
 from lxml.etree import _ElementTree
 
 from weightless.core import asList
@@ -43,22 +45,28 @@ class LxmlToFieldsList(Observable):
         if type(lxmlNode) is _ElementTree:
             lxmlNode = lxmlNode.getroot()
         fieldslist = asList(fieldsFromAnnotation(lxmlNode))
+        from pprint import pprint
+        pprint(fieldslist)
+        import sys; sys.stdout.flush()
         yield self.all.add(fieldslist=fieldslist, **kwargs)
-
 
 def fieldsFromAnnotation(lxmlNode):
     for annotation in lxmlNode.getchildren():
         if annotation.tag == curieToTag('oa:Annotation'):
             for child in annotation.iterchildren():
-                fieldname = tagToCurie(child.tag)
+                try:
+                    fieldname = tagToCurie(child.tag)
+                except KeyError:
+                    print_exc()
+                    continue
                 if child.tag != HAS_BODY:
                     yield fieldname + ".uri", child.attrib.get(RDF_RESOURCE)
                 else:
                     bodyNode = child.getchildren()[0]
                     for bodyChildNode in bodyNode.iterchildren():
-                        yield _yieldField(bodyChildNode)
+                        yield _yieldField(bodyChildNode, lxmlNode=lxmlNode)
 
-def _yieldField(node, parent=''):
+def _yieldField(node, lxmlNode, parent='', resourcesSeen=set()):
     fieldname = namespaces.tagToCurie(node.tag)
     if fieldname != 'rdf:Description' and fieldname != 'rdf:type':
         if parent:
@@ -66,7 +74,7 @@ def _yieldField(node, parent=''):
         fieldname = parent + fieldname
     else:
         fieldname = parent
-
+    resource = node.attrib.get(RDF_RESOURCE) or node.attrib.get(RDF_ABOUT)
     for postfix, value in (
             ('.uri', node.attrib.get(RDF_RESOURCE)),
             ('.uri', node.attrib.get(RDF_ABOUT)),
@@ -76,7 +84,15 @@ def _yieldField(node, parent=''):
             continue
         yield fieldname + postfix, value
     for child in node.iterchildren():
-        yield _yieldField(child, parent=fieldname)
+        yield _yieldField(child, lxmlNode=lxmlNode, parent=fieldname)
+    if not resource is None and not resource in resourcesSeen:
+        yield _followResource(resource, lxmlNode, parent=fieldname, resourcesSeen=resourcesSeen)
+
+def _followResource(uri, lxmlNode, parent, resourcesSeen):
+    conceptNodes = namespaces.xpath(lxmlNode, '*[@rdf:about="%s"]' % uri)
+    for conceptNode in conceptNodes:
+        for child in conceptNode.iterchildren():
+            yield _yieldField(child, lxmlNode, parent, resourcesSeen.union([uri]))
 
 
 RDF_RESOURCE = namespaces.curieToTag('rdf:resource')

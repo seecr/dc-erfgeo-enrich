@@ -51,7 +51,7 @@ from meresco.oai import OaiDownloadProcessor, UpdateAdapterFromOaiDownloadProces
 
 from meresco.lucene import LuceneSettings, Lucene, LuceneSettings, Fields2LuceneDoc, KEY_PREFIX, FieldsListToLuceneDocument
 from meresco.lucene.adaptertolucenequery import AdapterToLuceneQuery
-from meresco.lucene.fieldregistry import FieldRegistry, DOUBLEFIELD
+from meresco.lucene.fieldregistry import FieldRegistry, DOUBLEFIELD, INTFIELD
 from meresco.lucene.queryexpressiontolucenequerydict import QueryExpressionToLuceneQueryDict
 from meresco.lucene.remote import LuceneRemoteService
 
@@ -72,6 +72,8 @@ unqualifiedTermFields = [(ALL_FIELD, 1.0)]
 fieldRegistry = FieldRegistry(drilldownFields=IndexFields.drilldownFields)
 fieldRegistry.register('dcterms:spatial.geo:long', fieldDefinition=DOUBLEFIELD)
 fieldRegistry.register('dcterms:spatial.geo:lat', fieldDefinition=DOUBLEFIELD)
+fieldRegistry.register('schema:width', fieldDefinition=INTFIELD)
+fieldRegistry.register('schema:height', fieldDefinition=INTFIELD)
 
 parseHugeOptions = dict(huge_tree=True, remove_blank_text=True)
 

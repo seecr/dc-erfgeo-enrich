@@ -41,4 +41,8 @@
       </rdf:Description>
     </oa:hasBody>
   </oa:Annotation>
+  <rdf:Description xmlns:schema="http://schema.org/" rdf:about="http://www.beeldbankwo2.nl/cgi-bin/frsiserver.dll/thumbnail/127080-thumb.jpg?frskey=127080">
+    <schema:width>75</schema:width>
+    <schema:height>120</schema:height>
+  </rdf:Description>
 </rdf:RDF>
