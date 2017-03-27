@@ -76,10 +76,6 @@ class IndexFields(object):
                 continue
             fields.append((f, v))
             self._fieldnames.add(f)
-        s = [(f, v) for (f, v) in fields if not f.startswith('dcterms:spatial') or f.startswith('schema') or (f.startswith('dcterms:spatial.') and isinstance(v, basestring))]
-        if s:
-            print 'fields', s
-            import sys; sys.stdout.flush()
         raise StopIteration(fields)
         yield
 

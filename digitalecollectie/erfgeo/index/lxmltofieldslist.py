@@ -45,9 +45,6 @@ class LxmlToFieldsList(Observable):
         if type(lxmlNode) is _ElementTree:
             lxmlNode = lxmlNode.getroot()
         fieldslist = asList(fieldsFromAnnotation(lxmlNode))
-        from pprint import pprint
-        pprint(fieldslist)
-        import sys; sys.stdout.flush()
         yield self.all.add(fieldslist=fieldslist, **kwargs)
 
 def fieldsFromAnnotation(lxmlNode):
