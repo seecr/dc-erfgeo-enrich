@@ -63,7 +63,7 @@ class SearchJsonResponseTest(SeecrTestCase):
             )
         )
         result = asString(top.all.handleRequest(arguments={'query': ['fiets']}))
-        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
+        self.assertEquals([{'headers': {'User-Agent': 'SearchJsonResponse'}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=edm%3AdataProvider%2Cdc%3Asubject', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         self.assertTrue('Access-Control-Allow-Origin: *' in header)
         result = loads(body, parse_float=Decimal)
@@ -106,7 +106,7 @@ class SearchJsonResponseTest(SeecrTestCase):
             )
         )
         result = asString(top.all.handleRequest(arguments={'query': ['fiets'], 'facets': ['dc:subject,edm:dataProvider']}))
-        self.assertEquals([{'headers': {}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=dc%3Asubject%2Cedm%3AdataProvider', 'port': 3333}], httpRequests)
+        self.assertEquals([{'headers': {'User-Agent': 'SearchJsonResponse'}, 'host': '127.0.0.1', 'request': '/sru?version=1.2&operation=searchRetrieve&query=fiets&x-term-drilldown=dc%3Asubject%2Cedm%3AdataProvider', 'port': 3333}], httpRequests)
         header, body = result.split(CRLF * 2)
         result = loads(body, parse_float=Decimal)
         facets = result['result']['facets']

@@ -51,7 +51,6 @@ class SearchJsonResponse(Observable):
 
     def handleRequest(self, **kwargs):
         sruRequest = self._sruPath
-        headers = kwargs.get('Headers', {})
         arguments = kwargs.get('arguments')
         if not 'query' in arguments:
             yield redirectHttp % '/api'
@@ -59,9 +58,19 @@ class SearchJsonResponse(Observable):
         sruArguments = self._rewriteArgumentsForSru(arguments)
         if sruArguments:
             sruRequest = sruRequest + '?' + urlencode(sruArguments, doseq=True)
-        response = yield self.any.httprequest(host='127.0.0.1', port=self._sruPort, request=sruRequest, headers=headers)
+        requestHeaders = {'User-Agent': self.__class__.__name__}
+        headers = kwargs.get('Headers', {})
+        if 'Host' in headers:
+            requestHeaders['Host'] = headers['Host']
+        response = yield self.any.httprequest(host='127.0.0.1', port=self._sruPort, request=sruRequest, headers=requestHeaders)
         header, body = response.split(CRLF * 2)
-        jsonResponse = self._sruResponseToJson(arguments=arguments, sruResponseLxml=XML(body), sruRequest=sruRequest)
+        try:
+            bodyLxml = XML(body)
+        except Exception, e:
+            print 'got reponse', header + CRLF * 2 + body
+            import sys; sys.stdout.flush()
+            raise
+        jsonResponse = self._sruResponseToJson(arguments=arguments, sruResponseLxml=bodyLxml, sruRequest=sruRequest)
         yield 'HTTP/1.0 200 OK' + CRLF
         yield 'Content-Type: application/json' + CRLF
         yield 'Access-Control-Allow-Origin: *' + CRLF
