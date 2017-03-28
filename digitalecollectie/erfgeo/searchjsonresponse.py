@@ -163,6 +163,8 @@ def summaryWithEnrichmentToJsonLd(rdf):
             value = value.strip()
             if elementCurie in DECIMAL_VALUE_RELATIONS:
                 value = Decimal(value)
+            elif elementCurie in INTEGER_VALUE_RELATIONS:
+                value = int(value)
             if elementCurie in SINGLE_LITERAL_VALUE_RELATIONS:
                 d[elementCurie] = value
                 return
@@ -177,8 +179,7 @@ def summaryWithEnrichmentToJsonLd(rdf):
             value = uri
             if not uri in urisResolved:
                 urisResolved.add(uri)
-                descriptionElement = xpathFirst(rdf, '//*[@rdf:about="%s"]' % uri)
-                if not descriptionElement is None:
+                for descriptionElement in xpath(rdf, '//*[@rdf:about="%s"]' % uri):
                     value = {}
                     processResourceElement(value, descriptionElement)
             objects.append(value)
@@ -217,6 +218,8 @@ RESOURCE_RELATIONS = set([
 ])
 
 DECIMAL_VALUE_RELATIONS = set(['geo:lat', 'geo:long'])
+
+INTEGER_VALUE_RELATIONS = set(['schema:width', 'schema:height'])
 
 SINGLE_LITERAL_VALUE_RELATIONS = set(['geo:lat', 'geo:long', 'skos:prefLabel'])
 
