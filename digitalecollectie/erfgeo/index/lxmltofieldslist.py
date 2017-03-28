@@ -64,7 +64,10 @@ def fieldsFromAnnotation(lxmlNode):
                         yield _yieldField(bodyChildNode, lxmlNode=lxmlNode)
 
 def _yieldField(node, lxmlNode, parent='', resourcesSeen=set()):
-    fieldname = namespaces.tagToCurie(node.tag)
+    try:
+        fieldname = namespaces.tagToCurie(node.tag)
+    except KeyError:
+        return
     if fieldname != 'rdf:Description' and fieldname != 'rdf:type':
         if parent:
             parent += "."
