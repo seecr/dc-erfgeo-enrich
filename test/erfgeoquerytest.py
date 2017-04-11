@@ -8,9 +8,9 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015-2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2015-2016 Stichting DEN http://www.den.nl
+# Copyright (C) 2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2016 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
 #
@@ -30,34 +30,25 @@
 #
 ## end license ##
 
-def getitem(d, key, default=None):
-    if d is None:
-        return default
-    return d.get(key, default)
+from os.path import join, dirname
 
-def first(l, default=None):
-    if l:
-        for v in l:
-            return v
-    return default
+from seecr.test import SeecrTestCase
 
-def indexOf(e, l, default=-1):
-    try:
-        return l.index(e)
-    except ValueError:
-        return default
+from digitalecollectie.erfgeo.erfgeoquery import ErfGeoQuery
 
-def uriWithBase(uri, base):
-    if not ':' in uri and not base is None:
-        uri = base + uri
-    return uri
 
-class Bucket(object):
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+testDataDir = join(dirname(__file__), 'data')
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
 
-    def get(self, key, default):
-        return self.__dict__.get(key, default)
+class ErfGeoQueryTest(SeecrTestCase):
+    def testParseQueryResponse(self):
+        egq = ErfGeoQuery()
+        body = open(join(testDataDir, 'haarlem.response.json')).read()
+        results = egq.parseQueryResponse(body)
+        hgType, pits = results[0]
+        self.assertEquals('hg:Municipality', hgType)
+        self.assertEquals('http://rdf.histograph.io/atlas-verstedelijking/Haarlemmermeer-1950', pits[0]['@id'])
+        self.assertEquals('http://rdf.histograph.io/militieregisters/2703', pits[1]['@id'])
+        pitIds = [p['@id'] for p in pits]
+        self.assertTrue('http://sws.geonames.org/2754999/' in pitIds, pitIds)
+        self.assertTrue('http://www.gemeentegeschiedenis.nl/gemeentenaam/Haarlemmermeer' in pitIds, pitIds)
