@@ -59,7 +59,7 @@ documentationDir = join(projectDir, "doc")
 class ErfGeoIntegrationState(IntegrationState):
     def __init__(self, stateName, tests=None, fastMode=False):
         IntegrationState.__init__(self, stateName, tests=tests, fastMode=fastMode)
-        self.JAVA_BIN = "/usr/lib/jvm/java-1.8.0/bin"
+        self.JAVA_BIN = "/usr/lib/jvm/java-8-openjdk-amd64/bin"
         self.testdataDir = join(mydir, 'data')
 
         self.digitaleCollectiePort = PortNumberGenerator.next()
