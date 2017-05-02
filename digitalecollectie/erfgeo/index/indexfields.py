@@ -8,8 +8,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015, 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015, 2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -127,7 +127,10 @@ class IndexFields(object):
                     yield 'dcterms:spatial.geo:lat', float(geoLat)
                 return
             if fieldname in {'dcterms:spatial.geo:long', 'dcterms:spatial.geo:lat'}:
-                value = float(value)
+                try:
+                    value = float(value)
+                except ValueError:  # illegal values have been encountered in the wild, so
+                    return
         if fieldname in ['dc:date', 'dcterms:created']:
             for year in parseYears(value):
                 yield 'dc:date.year', str(year)
