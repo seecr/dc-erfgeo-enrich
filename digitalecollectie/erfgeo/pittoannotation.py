@@ -102,7 +102,9 @@ class PitToAnnotation(Observable):
         type = pit.get('type')
         if type:
             yield '    <rdf:type rdf:resource="%s"/>\n' % xmlEscape(curieToUri(type))
-        yield '    <rdfs:label>%s</rdfs:label>\n' % xmlEscape(pit['name'])
+        name = pit.get('name')
+        if name:
+            yield '    <rdfs:label>%s</rdfs:label>\n' % xmlEscape(name)
         yield self._renderPartOf(pit)
         owlSameAs = pit.get('uri')
         if owlSameAs:
