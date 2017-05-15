@@ -10,8 +10,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015-2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015-2016 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -88,6 +88,7 @@ class ErfGeoQuery(Observable):
                 for pit in properties['pits']:
                     pit['@base'] = base
                     pit['@id'] = uriWithBase(pit['@id'], base)
+                    pit['type'] = pit.get('type', hgType)
                     geometryIndex = pit['geometryIndex']
                     pit['geometry'] = Geometry.fromGeoDict(geometries[geometryIndex]) if geometryIndex > -1 else None
                     pits.append(pit)

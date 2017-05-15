@@ -9,8 +9,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015-2016 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015-2016 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015-2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015-2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015-2016 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -99,7 +99,9 @@ class PitToAnnotation(Observable):
 
     def _renderPit(self, pit):
         yield '<hg:PlaceInTime rdf:about="%s">\n' % xmlEscape(pit['@id'])
-        yield '    <rdf:type rdf:resource="%s"/>\n' % xmlEscape(curieToUri(pit['type']))
+        type = pit.get('type')
+        if type:
+            yield '    <rdf:type rdf:resource="%s"/>\n' % xmlEscape(curieToUri(type))
         yield '    <rdfs:label>%s</rdfs:label>\n' % xmlEscape(pit['name'])
         yield self._renderPartOf(pit)
         owlSameAs = pit.get('uri')
