@@ -8,8 +8,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015, 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015, 2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -66,7 +66,7 @@ class SearchJsonResponse(Observable):
         header, body = response.split(CRLF * 2)
         try:
             bodyLxml = XML(body)
-        except Exception, e:
+        except Exception:
             print 'got reponse', header + CRLF * 2 + body
             import sys; sys.stdout.flush()
             raise
@@ -91,6 +91,9 @@ class SearchJsonResponse(Observable):
             facets = ['edm:dataProvider', 'dc:subject']
         if not 'x-termdrilldown' in arguments:
             sruArguments['x-term-drilldown'] = ','.join(facets)
+        if 'random' in arguments:
+            random = sruArguments.pop('random')
+            sruArguments['x-random'] = random
         return [('version', ['1.2']), ('operation', 'searchRetrieve')] + sruArguments.items()
 
     def _sruResponseToJson(self, arguments, sruResponseLxml, sruRequest):
@@ -128,7 +131,7 @@ class SearchJsonResponse(Observable):
         if facets:
             result['facets'] = facets
         nextRecordPosition = xpathFirst(sruResponseLxml, '/srw:searchRetrieveResponse/srw:nextRecordPosition/text()')
-        if nextRecordPosition:
+        if nextRecordPosition and not 'random' in arguments and not 'x-random' in arguments:
             result['nextPage'] = '/search?' + urlencode(dict(arguments, startRecord=nextRecordPosition), doseq=True)
         return self._resultAsJson(result)
 

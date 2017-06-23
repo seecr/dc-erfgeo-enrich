@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ## begin license ##
 #
 # "Digitale Collectie ErfGeo Enrichment" is a service that attempts to automatically create
@@ -9,9 +8,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015, 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015, 2017 Seecr (Seek You Too B.V.) http://seecr.nl
-# Copyright (C) 2015, 2016 Stichting DEN http://www.den.nl
+# Copyright (C) 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2017 Seecr (Seek You Too B.V.) http://seecr.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
 #
@@ -31,33 +29,26 @@
 #
 ## end license ##
 
-from os import system
-from sys import path
-from unittest import main
+from random import sample
 
-system('find .. -name "*.pyc" | xargs rm -f')
-from glob import glob
-for dir in glob('../deps.d/*'):
-    path.insert(0, dir)
-path.insert(0, "..")
-
-from adoptoaisetspecstest import AdoptOaiSetSpecsTest
-from callstackdicttest import CallStackDictTest
-from erfgeoenrichmentfromsummarytest import ErfGeoEnrichmentFromSummaryTest
-from erfgeoquerytest import ErfGeoQueryTest
-from oaisetsharvestertest import OaiSetsHarvesterTest
-from pittoannotationtest import PitToAnnotationTest
-from rewriteboundingboxfieldstest import RewriteBoundingBoxFieldsTest
-from searchjsonresponsetest import SearchJsonResponseTest
-from setsselectiontest import SetsSelectionTest
-from summarytoerfgeoenrichmenttest import SummaryToErfGeoEnrichmentTest
-from unprefixidentifiertest import UnprefixIdentifierTest
-from geometrytest import GeometryTest
-from randomresultstest import RandomResultsTest
-
-from index.lxmltofieldslisttest import LxmlToFieldsListTest
-from index.dateparsetest import DateParseTest
+from meresco.core import Observable
 
 
-if __name__ == '__main__':
-    main()
+class RandomResults(Observable):
+    def executeQuery(self, **kwargs):
+        extraArguments = kwargs.get('extraArguments', {})
+        random = ('true' == extraArguments.get('x-random', ['false'])[0].lower())
+        if random:
+            maxRecords = kwargs.get('maximumRecords', 10)
+            kwargs['maximumRecords'] = maxRecords * RETRIEVE_EXTRA_FACTOR
+        response = yield self.any.executeQuery(**kwargs)
+        if random:
+            if len(response.hits) >= maxRecords:
+                response.hits = self._sample(response.hits, maxRecords)
+        raise StopIteration(response)
+
+    def _sample(self, population, k):
+        return sample(population, k)
+
+
+RETRIEVE_EXTRA_FACTOR = 100

@@ -9,8 +9,8 @@
 # by Seecr (http://seecr.nl).
 # The project is based on the open source project Meresco (http://meresco.org).
 #
-# Copyright (C) 2015 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
-# Copyright (C) 2015 Seecr (Seek You Too B.V.) http://seecr.nl
+# Copyright (C) 2015, 2017 Netherlands Institute for Sound and Vision http://instituut.beeldengeluid.nl/
+# Copyright (C) 2015, 2017 Seecr (Seek You Too B.V.) http://seecr.nl
 # Copyright (C) 2015 Stichting DEN http://www.den.nl
 #
 # This file is part of "Digitale Collectie ErfGeo Enrichment"
@@ -73,6 +73,7 @@ from digitalecollectie.erfgeo.summaryforrecordid import SummaryForRecordId
 from digitalecollectie.erfgeo.summarytoerfgeoenrichment import SummaryToErfGeoEnrichment
 from digitalecollectie.erfgeo.unprefixidentifier import UnprefixIdentifier
 from digitalecollectie.erfgeo.utils import getitem
+from digitalecollectie.erfgeo.randomresults import RandomResults
 
 
 workingPath = dirname(abspath(__file__))
@@ -257,13 +258,15 @@ def dna(reactor, config, statePath, out=stdout):
                         ),
                         (PathFilter("/sru"),
                             (SruParser(defaultRecordSchema='erfGeoEnrichment+summary', defaultRecordPacking='xml'),
-                                (SruHandler(drilldownMaximumMaximumResults=DRILLDOWN_MAXIMUM),
+                                (SruHandler(drilldownMaximumMaximumResults=DRILLDOWN_MAXIMUM, extraXParameters=['x-random']),
                                     (FilterMessages(allowed=['executeQuery']),
                                         (CqlMultiSearchClauseConversion(
                                               cqlClauseConverters,
                                               fromKwarg='query'),
                                             (TranslateDrilldownFieldnames(translate=lambda field: UNTOKENIZED_PREFIX + field),
-                                                (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
+                                                (RandomResults(),
+                                                    (LuceneRemote(host='localhost', port=indexPortNumber, path='/lucene'),)
+                                                )
                                             ),
                                         ),
                                     ),
